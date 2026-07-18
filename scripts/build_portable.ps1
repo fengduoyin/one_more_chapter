@@ -34,7 +34,7 @@ if (-not (Test-Path "frontend\dist\index.html")) {
 $venv = Join-Path $Root ".venv-win-build"
 if (-not (Test-Path $venv)) {
   py -3.13 -m venv $venv
-  & "$venv\Scripts\pip.exe" install -r packaging\requirements-portable.txt
+  & "$venv\Scripts\pip.exe" install -r backend\requirements.txt -r packaging\requirements-portable.txt
 }
 
 if (Test-Path $DistDir) { Remove-Item -Recurse -Force $DistDir }

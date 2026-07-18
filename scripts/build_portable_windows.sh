@@ -56,7 +56,7 @@ docker run --rm \
     mkdir -p /tmp/runtime-root
     chmod 700 /tmp/runtime-root
     . /opt/mkuserwineprefix
-    wine python -m pip install -q -r packaging/requirements-portable.txt
+    wine python -m pip install -q -r backend/requirements.txt -r packaging/requirements-portable.txt
     wine python -m PyInstaller --noconfirm --clean \
       --distpath Z:/src/dist/pyi-dist-win \
       --workpath Z:/src/dist/pyi-work-win \

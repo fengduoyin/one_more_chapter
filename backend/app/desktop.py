@@ -3,7 +3,7 @@
 Repo mode:
 
     ./scripts/run_portable.sh
-    DB_ENGINE=sqlite python -m backend.app.desktop
+    python -m backend.app.desktop
 
 Frozen (PyInstaller) mode: double-click ReadingLibrary / ReadingLibrary.exe
 
@@ -58,7 +58,6 @@ def configure_portable_env(root: Path | None = None) -> Path:
     data_dir.mkdir(parents=True, exist_ok=True)
     uploads_dir.mkdir(parents=True, exist_ok=True)
 
-    os.environ.setdefault("DB_ENGINE", "sqlite")
     os.environ.setdefault("SQLITE_PATH", str(data_dir / "reading_library.db"))
     os.environ.setdefault("UPLOADS_DIR", str(uploads_dir))
     os.environ.setdefault("STATIC_DIR", str(static_dir))

@@ -19,8 +19,7 @@ from backend.app.settings import settings
 
 
 def create_app() -> FastAPI:
-    if settings.is_sqlite:
-        ensure_schema()
+    ensure_schema()
 
     app = FastAPI(title="Reading Library", version="0.1.0")
 

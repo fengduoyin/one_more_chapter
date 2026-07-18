@@ -1,1 +1,2 @@
-# Portable runtime data (DB + uploads) is created by scripts/migrate_to_portable.sh
+# Portable runtime data (DB + uploads) lives here during local/dev portable runs.
+# Contents are gitignored; see scripts/run_portable.sh.

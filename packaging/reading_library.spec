@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """PyInstaller spec for Reading Library portable build.
 
-Built by scripts/build_portable.sh from the repo root (paths are relative to CWD).
+Built by scripts/build_portable_windows.sh (or build_portable.ps1) from the repo root.
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["psycopg", "psycopg2", "alembic", "tkinter", "matplotlib", "numpy"],
+    excludes=["tkinter", "matplotlib", "numpy"],
     noarchive=False,
 )
 
