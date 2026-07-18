@@ -1,0 +1,47 @@
+name: reading-library
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      # EXAMPLE values only — set your own in `.env` (see `.env.example`).
+      POSTGRES_DB: ${DB_NAME:-reading_library}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER in .env — copy .env.example and replace the example credentials}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env — copy .env.example and replace the example credentials}
+    volumes:
+      - reading_library_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    # Port is not published on the host by default (avoids clashing with a local Postgres on :5432).
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "3050:3050"
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 3050
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-reading_library}
+      DB_USER: ${DB_USER:?Set DB_USER in .env — copy .env.example and replace the example credentials}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env — copy .env.example and replace the example credentials}
+      STATIC_DIR: frontend/dist
+      UPLOADS_DIR: backend/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+
+volumes:
+  reading_library_pgdata:

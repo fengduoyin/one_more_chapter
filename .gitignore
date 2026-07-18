@@ -1,0 +1,25 @@
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+backend/.venv/
+backend/.python-version
+
+backend/uploads/
+
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+.env
+
+# Portable (SQLite) local data — keep the folder, ignore DB contents
+portable/data/
+portable/uploads/
+.venv/
+.venv-win-build/
+dist/
+

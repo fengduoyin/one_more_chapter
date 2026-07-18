@@ -1,0 +1,71 @@
+name: Build portable Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-portable:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install portable Python deps
+        run: pip install -r packaging/requirements-portable.txt
+
+      - name: PyInstaller
+        run: |
+          pyinstaller --noconfirm --clean `
+            --distpath dist/pyi-dist-win `
+            --workpath dist/pyi-work-win `
+            packaging/reading_library.spec
+
+      - name: Assemble portable folder
+        shell: pwsh
+        run: |
+          $Out = "dist/ReadingLibrary-portable-win64"
+          $Src = "dist/pyi-dist-win/ReadingLibrary"
+          if (-not (Test-Path "$Src/ReadingLibrary.exe")) { throw "Missing ReadingLibrary.exe" }
+          New-Item -ItemType Directory -Force -Path $Out | Out-Null
+          Copy-Item -Recurse -Force "$Src/*" $Out
+          Copy-Item packaging/README_PORTABLE.txt "$Out/README.txt"
+          Copy-Item packaging/Start.bat "$Out/Start.bat"
+          New-Item -ItemType Directory -Force -Path "$Out/data","$Out/uploads" | Out-Null
+          $Stamp = Get-Date -Format "yyyyMMdd"
+          $Zip = "dist/ReadingLibrary-portable-win64-$Stamp.zip"
+          if (Test-Path $Zip) { Remove-Item $Zip }
+          Compress-Archive -Path $Out -DestinationPath $Zip
+          echo "ZIP_PATH=$Zip" >> $env:GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReadingLibrary-portable-win64
+          path: |
+            dist/ReadingLibrary-portable-win64
+            dist/ReadingLibrary-portable-win64-*.zip
+          if-no-files-found: error

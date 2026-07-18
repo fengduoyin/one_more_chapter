@@ -1,0 +1,10 @@
+# Portable build only (no PostgreSQL driver).
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.32
+pydantic==2.8.2
+pydantic-settings==2.4.0
+python-multipart==0.0.9
+pywebview==5.4
+pythonnet==3.0.5
+pyinstaller==6.11.1
