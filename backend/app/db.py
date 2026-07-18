@@ -17,12 +17,13 @@ class Base(DeclarativeBase):
 
 def _make_engine() -> Engine:
     url = settings.database_url
+    engine = create_engine(
+        url,
+        connect_args={"check_same_thread": False} if url.startswith("sqlite") else {},
+        pool_pre_ping=True,
+    )
+
     if url.startswith("sqlite"):
-        engine = create_engine(
-            url,
-            connect_args={"check_same_thread": False},
-            pool_pre_ping=True,
-        )
 
         @event.listens_for(engine, "connect")
         def _sqlite_on_connect(dbapi_connection, _connection_record) -> None:  # noqa: ANN001
@@ -30,9 +31,7 @@ def _make_engine() -> Engine:
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
 
-        return engine
-
-    return create_engine(url, pool_pre_ping=True)
+    return engine
 
 
 engine = _make_engine()

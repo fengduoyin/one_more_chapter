@@ -13,7 +13,6 @@ if [[ ! -f frontend/dist/index.html ]]; then
   (cd frontend && npm run build)
 fi
 
-export DB_ENGINE=sqlite
 export SQLITE_PATH="${SQLITE_PATH:-$ROOT/portable/data/reading_library.db}"
 export UPLOADS_DIR="${UPLOADS_DIR:-$ROOT/portable/uploads}"
 export STATIC_DIR="${STATIC_DIR:-$ROOT/frontend/dist}"
@@ -28,7 +27,7 @@ fi
 run_with_venv() {
   if [[ ! -d .venv ]]; then
     python3 -m venv .venv
-    .venv/bin/pip install -q -r backend/requirements.txt
+    .venv/bin/pip install -q -r backend/requirements.txt -r packaging/requirements-portable.txt
   fi
   exec .venv/bin/python -m backend.app.desktop
 }
@@ -43,7 +42,6 @@ run_with_docker() {
   exec docker run --rm --name reading-library-portable \
     -p "${APP_PORT}:${APP_PORT}" \
     -v "$ROOT:/app" -w /app \
-    -e DB_ENGINE=sqlite \
     -e SQLITE_PATH=/app/portable/data/reading_library.db \
     -e UPLOADS_DIR=/app/portable/uploads \
     -e STATIC_DIR=/app/frontend/dist \

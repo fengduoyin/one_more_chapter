@@ -35,7 +35,7 @@ jobs:
           npm run build
 
       - name: Install portable Python deps
-        run: pip install -r packaging/requirements-portable.txt
+        run: pip install -r backend/requirements.txt -r packaging/requirements-portable.txt
 
       - name: PyInstaller
         run: |

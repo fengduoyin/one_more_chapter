@@ -16,10 +16,13 @@ frontend/.vite/
 
 .env
 
+# Docker self-host SQLite data — keep the folder, ignore contents
+data/*
+!data/.gitkeep
+
 # Portable (SQLite) local data — keep the folder, ignore DB contents
 portable/data/
 portable/uploads/
 .venv/
 .venv-win-build/
 dist/
-

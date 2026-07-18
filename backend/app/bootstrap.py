@@ -1,4 +1,4 @@
-"""Ensure database schema exists (used by portable / SQLite startups)."""
+"""Ensure database schema exists (SQLite startups)."""
 
 from __future__ import annotations
 
@@ -6,21 +6,13 @@ from sqlalchemy import inspect, text
 
 from backend.app.db import Base, engine
 from backend.app import models  # noqa: F401
-from backend.app.settings import settings
 
 
 def ensure_schema() -> None:
-    """Create missing tables for the current models.
-
-    Docker/Postgres continues to use Alembic. Portable SQLite uses create_all
-    so we do not need dialect-specific historical migrations.
-    """
+    """Create missing tables for the current models."""
     Base.metadata.create_all(bind=engine)
 
-    if not settings.is_sqlite:
-        return
-
-    # Keep sqlite autoincrement counters aligned after create_all (empty DB).
+    # Keep sqlite autoincrement counters aligned after create_all.
     inspector = inspect(engine)
     with engine.begin() as conn:
         has_seq = conn.execute(
