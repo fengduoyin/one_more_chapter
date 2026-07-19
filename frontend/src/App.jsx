@@ -42,13 +42,6 @@ export default function App() {
     setBooks(list);
   }
 
-  async function reloadSummary() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    await apiGet(`/api/stats/summary?year=${year}&month=${month}`);
-  }
-
   useEffect(() => {
     reloadBooks().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,13 +56,11 @@ export default function App() {
       return copy;
     });
     setSelected((s) => (s?.id === updated.id ? updated : s));
-    reloadSummary().catch(() => {});
   }
 
   function removeBook(bookId) {
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
     setSelected((s) => (s?.id === bookId ? null : s));
-    reloadSummary().catch(() => {});
   }
 
   return (
@@ -143,6 +134,23 @@ export default function App() {
           <StatisticsPanel />
         </main>
       )}
+
+      <footer className="appFooter">
+        <span>
+          {t("brand.madeBy", { name: "fengduoyin" })}
+        </span>
+        <span className="appFooterSep" aria-hidden="true">
+          ·
+        </span>
+        <a
+          className="appFooterLink"
+          href="https://github.com/fengduoyin/one_more_chapter"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t("brand.github")}
+        </a>
+      </footer>
 
       {showAddBook ? (
         <BookAddModal

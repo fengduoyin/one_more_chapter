@@ -11,6 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from backend.app.api.deps import db_session
+from backend.app.covers import process_cover_bytes
 from backend.app.models import Book, BookStatus, Checkin
 from backend.app.progress import apply_deltas_to_book, book_progress_percent, resolve_progress_deltas
 from backend.app.schemas import BookCreate, BookOut, BookProgressIn, BookUpdate
@@ -169,17 +170,20 @@ def upload_cover(
     if content_type not in {"image/jpeg", "image/png", "image/webp"}:
         raise HTTPException(status_code=400, detail="Only jpeg/png/webp covers are supported")
 
-    ext = {
-        "image/jpeg": ".jpg",
-        "image/png": ".png",
-        "image/webp": ".webp",
-    }[content_type]
+    raw = file.file.read()
+    try:
+        data, ext = process_cover_bytes(raw, content_type=content_type)
+    except Exception as exc:  # noqa: BLE001 — invalid/corrupt upload
+        raise HTTPException(status_code=400, detail="Could not process cover image") from exc
 
     out_dir = Path(settings.uploads_dir) / "covers" / str(book_id)
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"cover{ext}"
 
-    data = file.file.read()
+    # Drop previous cover.* variants so format changes don't leave orphans.
+    for old in out_dir.glob("cover.*"):
+        old.unlink(missing_ok=True)
+
+    out_path = out_dir / f"cover{ext}"
     out_path.write_bytes(data)
 
     # store relative path under uploads mount

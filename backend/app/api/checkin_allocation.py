@@ -17,23 +17,28 @@ from backend.app.utils import (
 )
 
 
-def _checkin_entries_for_book(db: Session, book_id: int) -> dict[date, CheckinDayEntry]:
+def _checkin_entries_for_books(db: Session, book_ids: set[int]) -> dict[int, dict[date, CheckinDayEntry]]:
+    if not book_ids:
+        return {}
     rows = db.execute(
         select(
+            Checkin.book_id,
             Checkin.day,
             Checkin.words_delta,
             Checkin.pages_delta,
             Checkin.reading_minutes,
-        ).where(Checkin.book_id == book_id)
+        ).where(Checkin.book_id.in_(book_ids))
     ).all()
-    return {
-        day: CheckinDayEntry(
+    result: dict[int, dict[date, CheckinDayEntry]] = {}
+    for book_id, day, words_delta, pages_delta, reading_minutes in rows:
+        if book_id is None:
+            continue
+        result.setdefault(int(book_id), {})[day] = CheckinDayEntry(
             words=int(words_delta),
             pages=int(pages_delta),
             minutes=int(reading_minutes) if reading_minutes is not None else None,
         )
-        for day, words_delta, pages_delta, reading_minutes in rows
-    }
+    return result
 
 
 def _books_for_checkins(db: Session, checkins: list[Checkin]) -> dict[int, Book]:
@@ -48,18 +53,18 @@ def _books_for_checkins(db: Session, checkins: list[Checkin]) -> dict[int, Book]
 def effective_words_map(db: Session, checkins: list[Checkin]) -> dict[int, int]:
     books = _books_for_checkins(db, checkins)
     book_ids = set(books)
+    entries_by_book = _checkin_entries_for_books(db, book_ids)
 
     allocation_by_book: dict[int, dict[date, int]] = {}
     for book_id in book_ids:
         book = books.get(book_id)
         if book is None or book.start_date is None:
             continue
-        entries = _checkin_entries_for_book(db, book_id)
         allocation_by_book[book_id] = allocate_reading_words_by_day(
             int(book.words_read),
             book.start_date,
             reading_end_date(book.start_date, book.end_date),
-            entries,
+            entries_by_book.get(book_id, {}),
         ).by_day
 
     result: dict[int, int] = {}
@@ -89,6 +94,7 @@ def effective_pages_map(
     """
     books = _books_for_checkins(db, checkins)
     words_eff = effective_words if effective_words is not None else effective_words_map(db, checkins)
+    entries_by_book = _checkin_entries_for_books(db, set(books))
 
     page_allocation_by_book: dict[int, dict[date, int]] = {}
     for book_id, book in books.items():
@@ -97,12 +103,11 @@ def effective_pages_map(
         pages_read = int(book.pages_read or 0)
         if pages_read <= 0:
             continue
-        entries = _checkin_entries_for_book(db, book_id)
         page_allocation_by_book[book_id] = allocate_reading_pages_by_day(
             pages_read,
             book.start_date,
             reading_end_date(book.start_date, book.end_date),
-            entries,
+            entries_by_book.get(book_id, {}),
         ).by_day
 
     result: dict[int, int] = {}

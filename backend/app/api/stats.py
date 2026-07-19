@@ -112,15 +112,20 @@ def _book_words_in_period(
 
 
 def _words_in_period(start: date, end: date, db: Session) -> int:
-    orphan_words = int(
-        db.execute(
-            select(func.coalesce(func.sum(Checkin.words_delta), 0)).where(
-                Checkin.day >= start,
-                Checkin.day <= end,
-                Checkin.book_id.is_(None),
-            )
-        ).scalar_one()
-    )
+    return _words_from_period_data(start, end, _load_words_period_data(db, start, end))
+
+
+def _load_words_period_data(db: Session, start: date, end: date) -> dict:
+    orphan_rows = db.execute(
+        select(Checkin.day, Checkin.words_delta).where(
+            Checkin.day >= start,
+            Checkin.day <= end,
+            Checkin.book_id.is_(None),
+        )
+    ).all()
+    orphans_by_day: dict[date, int] = {}
+    for day, words_delta in orphan_rows:
+        orphans_by_day[day] = orphans_by_day.get(day, 0) + int(words_delta)
 
     checkin_book_ids = (
         db.execute(
@@ -180,10 +185,20 @@ def _words_in_period(start: date, end: date, db: Session) -> int:
                 minutes=int(reading_minutes) if reading_minutes is not None else None,
             )
 
-    total = orphan_words
-    for book in books_by_id.values():
-        total += _book_words_in_period(book, start, end, checkins_by_book)
+    return {
+        "orphans_by_day": orphans_by_day,
+        "books_by_id": books_by_id,
+        "checkins_by_book": checkins_by_book,
+    }
 
+
+def _words_from_period_data(start: date, end: date, data: dict) -> int:
+    orphan_words = sum(
+        words for day, words in data["orphans_by_day"].items() if start <= day <= end
+    )
+    total = orphan_words
+    for book in data["books_by_id"].values():
+        total += _book_words_in_period(book, start, end, data["checkins_by_book"])
     return total
 
 
@@ -286,7 +301,21 @@ def goals_progress(
 @router.get("/goals/progress/all", response_model=list[GoalProgressOut])
 def goals_progress_all(db: Session = Depends(db_session)) -> list[GoalProgressOut]:
     goals = db.execute(select(Goal).order_by(Goal.period_start.desc(), Goal.metric)).scalars().all()
-    return [_goal_progress_item(g, db) for g in goals]
+    current_cache: dict[tuple[str, date, date], int] = {}
+
+    def cached_current(metric: str, start: date, end: date) -> int:
+        key = (metric, start, end)
+        if key not in current_cache:
+            current_cache[key] = _goal_current(metric, start, end, db)
+        return current_cache[key]
+
+    items: list[GoalProgressOut] = []
+    for goal in goals:
+        start, end = _goal_period_range(goal)
+        current = cached_current(goal.metric, start, end)
+        pct = 0.0 if int(goal.target) == 0 else (current / int(goal.target)) * 100.0
+        items.append(GoalProgressOut(goal=_goal_out(goal), current=current, percent=float(pct)))
+    return items
 
 
 @router.get("/finished", response_model=FinishedListOut)
@@ -438,18 +467,55 @@ def analytics_charts(
 
     ref = date.today()
     heatmap_start, heatmap_end = _heatmap_range(ref)
-    by_day_dict, _, _ = _checkin_day_aggregates(heatmap_start, heatmap_end, db)
+    month_keys = _recent_months(months, ref)
+    first_start, _ = month_range(*month_keys[0])
+    _, last_end = month_range(*month_keys[-1])
+    span_start = min(heatmap_start, first_start)
+    span_end = max(heatmap_end, last_end)
+
+    # One load for heatmap + monthly series (same effective maps as before).
+    checkins = (
+        db.execute(
+            select(Checkin)
+            .where(Checkin.day >= span_start, Checkin.day <= span_end)
+            .order_by(Checkin.day.asc())
+        )
+        .scalars()
+        .all()
+    )
+    words_eff = effective_words_map(db, checkins) if checkins else {}
+    pages_eff = effective_pages_map(db, checkins, words_eff) if checkins else {}
+
+    by_day_full: dict[date, dict[str, int]] = {}
+    for checkin in checkins:
+        words = int(words_eff.get(checkin.id, checkin.words_delta))
+        pages = int(pages_eff.get(checkin.id, checkin.pages_delta))
+        minutes = int(checkin.reading_minutes) if checkin.reading_minutes else 0
+        entry = by_day_full.setdefault(checkin.day, {"words": 0, "pages": 0, "minutes": 0})
+        entry["words"] += words
+        entry["pages"] += pages
+        entry["minutes"] += minutes
+
     by_day = [
         StatsDayPoint(day=day, words=entry["words"], pages=entry["pages"], minutes=entry["minutes"])
-        for day, entry in sorted(by_day_dict.items())
+        for day, entry in sorted(by_day_full.items())
+        if heatmap_start <= day <= heatmap_end
     ]
 
+    # Words series still uses book-level allocation (same as _words_in_period),
+    # but the heavy book/check-in load runs once for the full span.
+    words_data = _load_words_period_data(db, span_start, span_end)
+
     by_month: list[StatsMonthPoint] = []
-    for year, month in _recent_months(months, ref):
+    for year, month in month_keys:
         start, end = month_range(year, month)
-        words_total = _words_in_period(start, end, db)
-        pages_total = _pages_in_period(start, end, db)
-        _, minutes_total, _ = _checkin_day_aggregates(start, end, db)
+        words_total = _words_from_period_data(start, end, words_data)
+        pages_total = 0
+        minutes_total = 0
+        for day, entry in by_day_full.items():
+            if start <= day <= end:
+                pages_total += entry["pages"]
+                minutes_total += entry["minutes"]
         by_month.append(
             StatsMonthPoint(
                 year=year,

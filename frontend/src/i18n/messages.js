@@ -2,7 +2,9 @@ export const messages = {
   ru: {
     brand: {
       title: "ONE MORE CHAPTER",
-      tagline: "твой личный читательский дневник"
+      tagline: "твой личный читательский дневник",
+      madeBy: "сделано c ♡ {name}",
+      github: "посмотреть на GitHub"
     },
     nav: {
       library: "Книги",
@@ -274,7 +276,9 @@ export const messages = {
   en: {
     brand: {
       title: "ONE MORE CHAPTER",
-      tagline: "your personal reading diary"
+      tagline: "your personal reading diary",
+      madeBy: "made with ♡ by {name}",
+      github: "check out on GitHub"
     },
     nav: {
       library: "Books",

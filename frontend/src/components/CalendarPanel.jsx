@@ -83,13 +83,11 @@ export default function CalendarPanel({ onBooksChanged }) {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
-  const [summary, setSummary] = useState(null);
   const [finished, setFinished] = useState(null);
-  const [days, setDays] = useState(null);
   const [monthCheckins, setMonthCheckins] = useState([]);
+  const [books, setBooks] = useState([]);
 
   const [selectedDayIso, setSelectedDayIso] = useState(null);
-  const [books, setBooks] = useState([]);
   const [selectedCheckins, setSelectedCheckins] = useState([]);
   const [editingCheckinId, setEditingCheckinId] = useState(null);
   const [editCheckinWords, setEditCheckinWords] = useState("");
@@ -109,15 +107,11 @@ export default function CalendarPanel({ onBooksChanged }) {
   async function reloadMonth() {
     const from = monthStartIso(year, month);
     const to = monthEndIso(year, month);
-    const [s, f, d, checkins] = await Promise.all([
-      apiGet(`/api/stats/summary?year=${year}&month=${month}`),
+    const [f, checkins] = await Promise.all([
       apiGet(`/api/stats/finished?year=${year}&month=${month}`),
-      apiGet(`/api/stats/checkin-days?year=${year}&month=${month}`),
       apiGet(`/api/checkins?from_day=${from}&to_day=${to}`)
     ]);
-    setSummary(s);
     setFinished(f);
-    setDays(d);
     setMonthCheckins(checkins);
   }
 
@@ -137,15 +131,6 @@ export default function CalendarPanel({ onBooksChanged }) {
     setShowAddForm(false);
   }, [year, month]);
 
-  async function reloadDayCheckins(dayIso = selectedDayIso) {
-    if (!dayIso) {
-      setSelectedCheckins([]);
-      return;
-    }
-    const rows = await apiGet(`/api/checkins?from_day=${dayIso}&to_day=${dayIso}`);
-    setSelectedCheckins(rows);
-  }
-
   useEffect(() => {
     setCheckinWords("");
     setCheckinPages("");
@@ -155,17 +140,22 @@ export default function CalendarPanel({ onBooksChanged }) {
     setCheckinError("");
     setEditingCheckinId(null);
     setShowAddForm(false);
+  }, [selectedDayIso]);
 
+  useEffect(() => {
     if (!selectedDayIso) {
       setSelectedCheckins([]);
       return;
     }
+    setSelectedCheckins(monthCheckins.filter((row) => row.day === selectedDayIso));
+  }, [selectedDayIso, monthCheckins]);
 
-    reloadDayCheckins(selectedDayIso).catch(() => setSelectedCheckins([]));
-  }, [selectedDayIso]);
-
-  const checkinDaysSet = useMemo(() => new Set(days?.days || []), [days]);
-  const checkinRanges = useMemo(() => groupConsecutiveDays(days?.days || []), [days]);
+  const checkinDayList = useMemo(
+    () => [...new Set(monthCheckins.map((row) => row.day))].sort(),
+    [monthCheckins]
+  );
+  const checkinDaysSet = useMemo(() => new Set(checkinDayList), [checkinDayList]);
+  const checkinRanges = useMemo(() => groupConsecutiveDays(checkinDayList), [checkinDayList]);
   const daySummaries = useMemo(() => buildDaySummaries(monthCheckins), [monthCheckins]);
 
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
@@ -175,8 +165,8 @@ export default function CalendarPanel({ onBooksChanged }) {
   }, [isCurrentMonth, checkinDaysSet, todayIso]);
 
   const connectedDaysSet = useMemo(
-    () => computeConnectedDaysInMonth(days?.days || [], year, month),
-    [days, year, month]
+    () => computeConnectedDaysInMonth(checkinDayList, year, month),
+    [checkinDayList, year, month]
   );
 
   const finishedDaysToBooks = useMemo(() => {
@@ -225,7 +215,18 @@ export default function CalendarPanel({ onBooksChanged }) {
   const monthNames = useMemo(() => getMonthNames(locale, "full"), [locale]);
   const monthShort = useMemo(() => getMonthNames(locale, "short"), [locale]);
   const monthLabel = `${monthNames[month - 1]} ${year}`;
-  const readingDaysCount = days?.days?.length || 0;
+  const readingDaysCount = checkinDayList.length;
+  const streakDaysCount = streakDaysSet.size;
+
+  async function notifyBooksChanged() {
+    try {
+      const list = await apiGet("/api/books");
+      setBooks(list);
+    } catch {
+      // ignore
+    }
+    onBooksChanged?.();
+  }
 
   function openAddForm() {
     setCheckinBookId(
@@ -295,14 +296,8 @@ export default function CalendarPanel({ onBooksChanged }) {
         note: editCheckinNote || null
       });
       setEditingCheckinId(null);
-      await reloadDayCheckins();
       await reloadMonth();
-      apiGet("/api/books")
-        .then((list) => {
-          setBooks(list);
-          onBooksChanged?.();
-        })
-        .catch(() => {});
+      await notifyBooksChanged();
     } catch (err) {
       const message = String(err?.message || "");
       setCheckinError(
@@ -336,14 +331,8 @@ export default function CalendarPanel({ onBooksChanged }) {
       setCheckinBookId("");
       setCheckinNote("");
       setShowAddForm(false);
-      await reloadDayCheckins();
       await reloadMonth();
-      apiGet("/api/books")
-        .then((list) => {
-          setBooks(list);
-          onBooksChanged?.();
-        })
-        .catch(() => {});
+      await notifyBooksChanged();
     } catch (err) {
       const message = String(err?.message || "");
       setCheckinError(
@@ -351,7 +340,7 @@ export default function CalendarPanel({ onBooksChanged }) {
           ? t("calendar.errCheckinExists")
           : t("calendar.errCreateCheckin")
       );
-      await reloadDayCheckins().catch(() => {});
+      await reloadMonth().catch(() => {});
     } finally {
       setCheckinBusy(false);
     }
@@ -365,14 +354,8 @@ export default function CalendarPanel({ onBooksChanged }) {
     try {
       await apiDelete(`/api/checkins/${checkinId}`);
       if (editingCheckinId === checkinId) setEditingCheckinId(null);
-      await reloadDayCheckins();
       await reloadMonth();
-      apiGet("/api/books")
-        .then((list) => {
-          setBooks(list);
-          onBooksChanged?.();
-        })
-        .catch(() => {});
+      await notifyBooksChanged();
     } catch {
       setCheckinError(t("calendar.errDeleteCheckin"));
     } finally {
@@ -406,9 +389,9 @@ export default function CalendarPanel({ onBooksChanged }) {
           </div>
           <div className="calendarBadges">
             <span className="calendarBadge">{formatReadingDaysLabel(readingDaysCount, locale, t)}</span>
-            {isCurrentMonth && summary?.current_strike_days ? (
+            {isCurrentMonth && streakDaysCount ? (
               <span className="calendarBadge calendarBadgeStreak">
-                {formatStrikeDaysLabel(summary.current_strike_days, locale, t)}
+                {formatStrikeDaysLabel(streakDaysCount, locale, t)}
               </span>
             ) : null}
           </div>
