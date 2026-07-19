@@ -12,6 +12,16 @@ If you encounter bugs or have suggestions regarding features/localization, pleas
 - **Stats** — period summaries, reading calendar, monthly charts
 - **Russian & English**, dark and light themes
 
+## Screenshots
+
+| **Books** | **Goals** |
+| --- | --- |
+| ![Books](images/screenshots/books_ld.png) | ![Goals](images/screenshots/goals_ld.png) |
+| **Calendar** | **Stats** |
+| ![Calendar](images/screenshots/calendar_ld.png) | ![Stats](images/screenshots/stats_ld.png) |
+
+See all [screenshots](images/screenshots/).
+
 ## Installation
 
 ### Option A: Docker
