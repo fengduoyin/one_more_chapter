@@ -125,7 +125,7 @@
 }
 
 :root{
-  --font-sans:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:"Manrope", ui-sans-serif, system-ui, sans-serif;
 
   /* Page title */
   --text-page-title-size:22px;
