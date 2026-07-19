@@ -9,6 +9,23 @@ import LocaleToggle from "./components/LocaleToggle.jsx";
 import StatisticsPanel from "./components/StatisticsPanel.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
 import { useLocale } from "./i18n/LocaleContext.jsx";
+import brandLogo from "./assets/brand/logo_icon.png";
+
+function BrandTitle({ text }) {
+  return (
+    <div className="brand">
+      {text.split(/(\s+)/).map((part, index) => {
+        if (!part || /^\s+$/.test(part)) return part;
+        return (
+          <span key={`${part}-${index}`}>
+            <span className="brandInitial">{part[0]}</span>
+            {part.slice(1)}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function App() {
   const { t } = useLocale();
@@ -25,13 +42,6 @@ export default function App() {
     setBooks(list);
   }
 
-  async function reloadSummary() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    await apiGet(`/api/stats/summary?year=${year}&month=${month}`);
-  }
-
   useEffect(() => {
     reloadBooks().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,21 +56,22 @@ export default function App() {
       return copy;
     });
     setSelected((s) => (s?.id === updated.id ? updated : s));
-    reloadSummary().catch(() => {});
   }
 
   function removeBook(bookId) {
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
     setSelected((s) => (s?.id === bookId ? null : s));
-    reloadSummary().catch(() => {});
   }
 
   return (
     <div className="page">
       <header className="header appHeader">
-        <div>
-          <div className="brand">{t("brand.title")}</div>
-          <div className="muted">{t("brand.tagline")}</div>
+        <div className="brandBlock">
+          <img className="brandLogo" src={brandLogo} alt="" />
+          <div className="brandText">
+            <BrandTitle text={t("brand.title")} />
+            <div className="brandTagline">{t("brand.tagline")}</div>
+          </div>
         </div>
         <div className="row appNav">
           <ThemeToggle />
@@ -116,13 +127,30 @@ export default function App() {
         </main>
       ) : tab === "calendar" ? (
         <main className="card appMain statsCard">
-          <CalendarPanel />
+          <CalendarPanel onBooksChanged={() => reloadBooks().catch(() => {})} />
         </main>
       ) : (
         <main className="card appMain statsCard">
           <StatisticsPanel />
         </main>
       )}
+
+      <footer className="appFooter">
+        <span>
+          {t("brand.madeBy", { name: "fengduoyin" })}
+        </span>
+        <span className="appFooterSep" aria-hidden="true">
+          ·
+        </span>
+        <a
+          className="appFooterLink"
+          href="https://github.com/fengduoyin/one_more_chapter"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t("brand.github")}
+        </a>
+      </footer>
 
       {showAddBook ? (
         <BookAddModal

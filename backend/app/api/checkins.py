@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.api.checkin_allocation import effective_pages_map, effective_words_map
 from backend.app.api.deps import db_session
-from backend.app.models import Book, Checkin
+from backend.app.models import Book, BookStatus, Checkin
 from backend.app.progress import apply_deltas_to_book, resolve_progress_deltas
 from backend.app.schemas import CheckinCreate, CheckinOut, CheckinUpdate
 
@@ -89,6 +89,20 @@ def _apply_book_deltas(db: Session, book_id: int | None, words_delta: int, pages
     db.add(book)
 
 
+def _ensure_book_reading(db: Session, book_id: int | None, day: date) -> None:
+    """First check-in on a planned book starts reading (same as /progress)."""
+    if book_id is None:
+        return
+    book = db.get(Book, book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    if book.status == BookStatus.planned.value:
+        book.status = BookStatus.reading.value
+    if book.start_date is None:
+        book.start_date = day
+    db.add(book)
+
+
 def _find_by_day_book(db: Session, day: date, book_id: int | None) -> Checkin | None:
     if book_id is None:
         return db.execute(
@@ -127,6 +141,7 @@ def create_checkin(payload: CheckinCreate, db: Session = Depends(db_session)) ->
     words_delta, pages_delta = _resolve_stored_deltas(book, int(payload.words_delta), int(payload.pages_delta))
     if payload.book_id is not None:
         _apply_book_deltas(db, payload.book_id, words_delta, pages_delta)
+        _ensure_book_reading(db, payload.book_id, payload.day)
 
     checkin = Checkin(
         day=payload.day,
@@ -205,6 +220,8 @@ def update_checkin(
     checkin.pages_delta = new_pages
 
     _apply_book_deltas(db, new_book_id, new_words, new_pages)
+    if new_book_id is not None:
+        _ensure_book_reading(db, new_book_id, checkin.day)
 
     db.add(checkin)
     db.commit()

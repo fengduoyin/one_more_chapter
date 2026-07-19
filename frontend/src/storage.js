@@ -1,9 +1,11 @@
 /** Safe localStorage access (SSR-safe, quota errors ignored). */
 
-export function readStorage(key, allowed, fallback) {
+export function readStorage(key, allowed, fallback, legacyKeys = []) {
   try {
-    const stored = localStorage.getItem(key);
-    if (allowed.includes(stored)) return stored;
+    for (const candidate of [key, ...legacyKeys]) {
+      const stored = localStorage.getItem(candidate);
+      if (allowed.includes(stored)) return stored;
+    }
   } catch {
     // ignore storage errors
   }

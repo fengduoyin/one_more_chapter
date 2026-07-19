@@ -21,7 +21,7 @@ from backend.app.settings import settings
 def create_app() -> FastAPI:
     ensure_schema()
 
-    app = FastAPI(title="Reading Library", version="0.1.0")
+    app = FastAPI(title="One More Chapter", version="0.1.0")
 
     uploads_path = Path(settings.uploads_dir)
     uploads_path.mkdir(parents=True, exist_ok=True)

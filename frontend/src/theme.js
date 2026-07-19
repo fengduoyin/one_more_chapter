@@ -2,11 +2,12 @@
 
 import { readStorage, writeStorage } from "./storage.js";
 
-const STORAGE_KEY = "reading-library-theme";
+const STORAGE_KEY = "one-more-chapter-theme";
+const LEGACY_KEYS = ["reading-library-theme"];
 const THEMES = ["light", "dark"];
 
 export function getInitialTheme() {
-  return readStorage(STORAGE_KEY, THEMES, "dark");
+  return readStorage(STORAGE_KEY, THEMES, "dark", LEGACY_KEYS);
 }
 
 export function applyTheme(theme) {

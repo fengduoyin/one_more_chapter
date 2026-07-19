@@ -196,7 +196,7 @@ export default function StatisticsPanel() {
               >
                 ‹
               </button>
-              <div className="title statsYearNavLabel">{year}</div>
+              <div className="statsYearNavLabel">{year}</div>
               <button
                 type="button"
                 className="monthYearPickerYearBtn"

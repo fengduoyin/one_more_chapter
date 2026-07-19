@@ -3,12 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reading Library</title>
+    <title>One More Chapter</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <script>
       try {
-        var theme = localStorage.getItem("reading-library-theme");
+        var theme =
+          localStorage.getItem("one-more-chapter-theme") ||
+          localStorage.getItem("reading-library-theme");
         document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "dark");
-        var locale = localStorage.getItem("reading-library-locale");
+        var locale =
+          localStorage.getItem("one-more-chapter-locale") ||
+          localStorage.getItem("reading-library-locale");
         document.documentElement.setAttribute("lang", locale === "en" ? "en" : "ru");
       } catch (e) {
         document.documentElement.setAttribute("data-theme", "dark");
@@ -21,4 +26,3 @@
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-

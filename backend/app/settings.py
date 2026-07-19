@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # Full SQLAlchemy URL wins over SQLITE_PATH when set.
     database_url_override: str | None = Field(default=None, validation_alias="DATABASE_URL")
 
-    sqlite_path: str = "data/reading_library.db"
+    sqlite_path: str = "data/ocm_db.db"
 
     uploads_dir: str = "data/uploads"
     static_dir: str = "frontend/dist"

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { formatReadingDuration } from "../bookStatus.js";
-import { getWeekdayLabels } from "../i18n/format.js";
+import { getWeekdayLabels, pluralWord } from "../i18n/format.js";
 import { useLocale } from "../i18n/LocaleContext.jsx";
 import BookCoverThumb from "./BookCoverThumb.jsx";
 
@@ -75,7 +75,7 @@ export default function MonthCalendar({
             tooltipParts.push(
               summary.totalMinutes > 0
                 ? formatReadingDuration(summary.totalMinutes)
-                : `${summary.checkins.length} ${t("common.entry")}`
+                : `${summary.checkins.length} ${pluralWord(locale, summary.checkins.length, "entry", t)}`
             );
           }
           if (finishedBooks.length) {

@@ -128,7 +128,9 @@ def _allocate_amount_by_day(
         split = _split_by_reading_minutes(remaining, unspecified_days, minutes_by_day)
         for day, amount in split.items():
             allocation[day] = amount
-    elif remaining > 0 and len(checkin_days) == 1:
+    elif remaining > 0 and len(checkin_days) == 1 and checkin_days[0] not in specified:
+        # Only estimate when the sole check-in day has no explicit amount.
+        # Never overwrite a user-entered delta with the book total.
         allocation[checkin_days[0]] = int(total)
 
     return ReadingAllocation(by_day=allocation)
