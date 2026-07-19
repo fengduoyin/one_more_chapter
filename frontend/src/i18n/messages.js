@@ -1,7 +1,7 @@
 export const messages = {
   ru: {
     brand: {
-      title: "One More Chapter",
+      title: "ONE MORE CHAPTER",
       tagline: "твой личный читательский дневник"
     },
     nav: {
@@ -270,7 +270,7 @@ export const messages = {
   },
   en: {
     brand: {
-      title: "One More Chapter",
+      title: "ONE MORE CHAPTER",
       tagline: "your personal reading diary"
     },
     nav: {

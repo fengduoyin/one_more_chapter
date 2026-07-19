@@ -113,7 +113,7 @@ export default function MonthYearPicker({ year, month, label, onChange }) {
     <div ref={rootRef} className={["monthYearPicker", open ? "monthYearPickerOpen" : ""].filter(Boolean).join(" ")}>
       <button
         type="button"
-        className="monthYearPickerTrigger title"
+        className="monthYearPickerTrigger"
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}

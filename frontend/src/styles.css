@@ -1,5 +1,34 @@
 /* Theme tokens (--accent, --cal-*, --goal-*) drive light/dark palettes and calendar colors. */
 
+@font-face{
+  font-family:"Open Sans";
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url("./assets/fonts/OpenSans-Regular.woff2") format("woff2");
+}
+@font-face{
+  font-family:"Open Sans";
+  font-style:normal;
+  font-weight:500;
+  font-display:swap;
+  src:url("./assets/fonts/OpenSans-Medium.woff2") format("woff2");
+}
+@font-face{
+  font-family:"Open Sans";
+  font-style:normal;
+  font-weight:600;
+  font-display:swap;
+  src:url("./assets/fonts/OpenSans-SemiBold.woff2") format("woff2");
+}
+@font-face{
+  font-family:"Open Sans";
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url("./assets/fonts/OpenSans-Bold.woff2") format("woff2");
+}
+
 [data-theme="dark"]{
   color-scheme:dark;
   --accent:#A29CEB;
@@ -59,6 +88,7 @@
   --goal-missed-border:rgba(232,110,110,.48);
   --status-planned-rgb:110,178,230;
   --status-abandoned-rgb:232,120,110;
+  --brand-initial:#B8B0F2;
   --control-height:42px;
 }
 
@@ -121,15 +151,16 @@
   --goal-missed-border:rgba(176,48,48,.42);
   --status-planned-rgb:42,128,196;
   --status-abandoned-rgb:196,64,64;
+  --brand-initial:#6F63C9;
   --control-height:42px;
 }
 
 :root{
-  --font-sans:"Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:"Open Sans", ui-sans-serif, system-ui, sans-serif;
 
-  /* Page title */
-  --text-page-title-size:22px;
-  --text-page-title-weight:600;
+  /* Page title (brand) */
+  --text-page-title-size:24px;
+  --text-page-title-weight:700;
 
   /* Section title */
   --text-section-title-size:16px;
@@ -140,7 +171,7 @@
   --text-body-weight:400;
 
   /* Secondary information */
-  --text-secondary-size:13px;
+  --text-secondary-size:12px;
   --text-secondary-weight:400;
 
   /* Statistics (18–22) */
@@ -152,6 +183,10 @@
   /* Buttons */
   --text-button-size:14px;
   --text-button-weight:500;
+
+  /* Library tile title (hover overlay) */
+  --text-tile-title-size:13px;
+  --text-tile-title-weight:700;
 }
 
 *{box-sizing:border-box}
@@ -266,9 +301,44 @@ body{
 .statsYearNav{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:8px;
 }
-.statsYearNavLabel{min-width:4ch; text-align:center}
+.statsMonthNav .monthYearPicker{margin:0}
+.statsMonthNav .monthYearPickerTrigger{margin-left:0}
+.statsMonthNav .monthYearPickerYearBtn,
+.statsYearNav .monthYearPickerYearBtn{
+  width:auto;
+  min-width:var(--control-height);
+  height:var(--control-height);
+  min-height:var(--control-height);
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid var(--border-soft);
+  background:var(--surface-1);
+  font-size:var(--text-button-size);
+  font-weight:var(--text-body-weight);
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.statsYearNavLabel{
+  min-width:4.5rem;
+  height:var(--control-height);
+  min-height:var(--control-height);
+  padding:0 12px;
+  box-sizing:border-box;
+  border-radius:12px;
+  border:1px solid var(--border-soft);
+  background:var(--surface-1);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:var(--text-button-size);
+  font-weight:var(--text-body-weight);
+  line-height:1.2;
+}
 .statsHero{font-size:var(--text-body-size); line-height:1.45}
 .statsHeroMeta{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight)}
 .statsError{color:#ff8f8f; font-size:var(--text-secondary-size)}
@@ -282,6 +352,7 @@ body{
 .statsMetricValue{
   font-size:var(--text-stats-size-lg);
   font-weight:var(--text-stats-weight);
+  font-variant-numeric:tabular-nums;
   line-height:1.1;
   letter-spacing:-.02em;
 }
@@ -615,10 +686,22 @@ body{
 }
 .panelShellBody::-webkit-scrollbar-track{background:transparent}
 .brand{
+  font-family:var(--font-sans);
   font-size:var(--text-page-title-size);
   font-weight:var(--text-page-title-weight);
   letter-spacing:.3px;
   line-height:1.25;
+}
+.brandInitial{
+  color:var(--brand-initial);
+}
+.brandTagline{
+  font-family:var(--font-sans);
+  color:var(--muted);
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+  margin-top:2px;
+  line-height:1.35;
 }
 .muted{
   color:var(--muted);
@@ -1084,8 +1167,8 @@ select.input option:hover{
   color:#fff;
 }
 .bookTileOverlayTitle{
-  font-size:var(--text-body-size);
-  font-weight:var(--text-button-weight);
+  font-size:var(--text-tile-title-size);
+  font-weight:var(--text-tile-title-weight);
   line-height:1.35;
   color:#fff;
 }
@@ -1716,16 +1799,40 @@ select.input option:hover{
   gap:8px;
   flex-wrap:wrap;
 }
+.calendarNav .btnSecondary,
+.calendarNav .monthYearPickerTrigger{
+  min-height:var(--control-height);
+  height:var(--control-height);
+  box-sizing:border-box;
+  padding-top:0;
+  padding-bottom:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:var(--text-button-size);
+  font-weight:var(--text-body-weight);
+  line-height:1.2;
+}
 .calendarMonthTitle{margin-left:4px}
-.monthYearPicker{position:relative}
+.monthYearPicker{position:relative; display:inline-flex; align-items:center}
 .monthYearPickerTrigger{
   margin-left:4px;
-  padding:6px 12px;
+  padding:0 12px;
+  min-height:var(--control-height);
+  height:var(--control-height);
+  box-sizing:border-box;
   border-radius:12px;
   border:1px solid var(--border-soft);
   background:var(--surface-1);
   color:var(--text);
   cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-family:inherit;
+  font-size:var(--text-button-size);
+  font-weight:var(--text-body-weight);
+  line-height:1.2;
 }
 .monthYearPickerTrigger:hover,
 .monthYearPickerOpen .monthYearPickerTrigger{

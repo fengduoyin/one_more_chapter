@@ -10,6 +10,22 @@ import StatisticsPanel from "./components/StatisticsPanel.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
 import { useLocale } from "./i18n/LocaleContext.jsx";
 
+function BrandTitle({ text }) {
+  return (
+    <div className="brand">
+      {text.split(/(\s+)/).map((part, index) => {
+        if (!part || /^\s+$/.test(part)) return part;
+        return (
+          <span key={`${part}-${index}`}>
+            <span className="brandInitial">{part[0]}</span>
+            {part.slice(1)}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function App() {
   const { t } = useLocale();
   // Always open on Books; theme/locale are persisted separately.
@@ -59,8 +75,8 @@ export default function App() {
     <div className="page">
       <header className="header appHeader">
         <div>
-          <div className="brand">{t("brand.title")}</div>
-          <div className="muted">{t("brand.tagline")}</div>
+          <BrandTitle text={t("brand.title")} />
+          <div className="brandTagline">{t("brand.tagline")}</div>
         </div>
         <div className="row appNav">
           <ThemeToggle />

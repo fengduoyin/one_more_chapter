@@ -172,5 +172,6 @@ Dockerfile.dev
 | -------- | ----------------------------------- |
 | Backend  | FastAPI, SQLAlchemy, SQLite         |
 | Frontend | React, Vite (SPA served by FastAPI) |
+| Fonts    | Open Sans (self-hosted, OFL) |
 | Desktop  | pywebview (Windows portable)        |
 | Runtime  | Docker Compose on port **3050**     |

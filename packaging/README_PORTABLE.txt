@@ -18,6 +18,7 @@
 #
 # Notes
 # - No Docker or Python install required.
+# - UI font (Open Sans) is bundled — no network needed for typography.
 # - Windows needs WebView2 (usually preinstalled with Edge). SmartScreen may warn
 #   about an unsigned app — choose "More info" → Run anyway.
 # - After downloading the ZIP, prefer Start.bat (it clears Windows "blocked" marks
