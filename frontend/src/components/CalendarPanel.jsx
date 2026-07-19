@@ -76,7 +76,7 @@ function CheckinTimelineItem({
   );
 }
 
-export default function CalendarPanel() {
+export default function CalendarPanel({ onBooksChanged }) {
   const { locale, t } = useLocale();
   const now = useMemo(() => new Date(), []);
   const todayIso = useMemo(() => isoDate(now), [now]);
@@ -298,7 +298,10 @@ export default function CalendarPanel() {
       await reloadDayCheckins();
       await reloadMonth();
       apiGet("/api/books")
-        .then(setBooks)
+        .then((list) => {
+          setBooks(list);
+          onBooksChanged?.();
+        })
         .catch(() => {});
     } catch (err) {
       const message = String(err?.message || "");
@@ -336,7 +339,10 @@ export default function CalendarPanel() {
       await reloadDayCheckins();
       await reloadMonth();
       apiGet("/api/books")
-        .then(setBooks)
+        .then((list) => {
+          setBooks(list);
+          onBooksChanged?.();
+        })
         .catch(() => {});
     } catch (err) {
       const message = String(err?.message || "");
@@ -362,7 +368,10 @@ export default function CalendarPanel() {
       await reloadDayCheckins();
       await reloadMonth();
       apiGet("/api/books")
-        .then(setBooks)
+        .then((list) => {
+          setBooks(list);
+          onBooksChanged?.();
+        })
         .catch(() => {});
     } catch {
       setCheckinError(t("calendar.errDeleteCheckin"));

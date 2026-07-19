@@ -1,8 +1,8 @@
-# Reading Library
+# One More Chapter
 
 A minimalist reading diary: track books, daily check-ins, reading goals, calendar streaks, and statistics — fully self-hostable with Docker, or as a Windows portable app.
 
-> Inspired in spirit by self-hosted reading tools such as [KoInsight](https://github.com/georgesg/koinsight). Reading Library, however, is a standalone diary (library, goals, calendar, stats) rather than a KOReader sync dashboard.
+> Inspired in spirit by self-hosted reading tools such as [KoInsight](https://github.com/georgesg/koinsight). One More Chapter, however, is a standalone diary (library, goals, calendar, stats) rather than a KOReader sync dashboard.
 
 ## Features
 
@@ -28,8 +28,8 @@ No separate database server is required: the app uses SQLite. Data is stored und
 #### Quick start
 
 ```bash
-git clone <your-repo-url> reading_library
-cd reading_library
+git clone <your-repo-url> one_more_chapter
+cd one_more_chapter
 cp .env.example .env   # optional — defaults work out of the box
 docker compose up --build
 ```
@@ -38,14 +38,14 @@ Open [http://localhost:3050](http://localhost:3050).
 
 | Path | Contents |
 | ---- | -------- |
-| `data/reading_library.db` | SQLite database |
+| `data/ocm_db.db` | SQLite database |
 | `data/uploads/` | Cover images |
 
 Backup tip: copy the whole `data/` folder.
 
 ### Option B — Windows portable (pywebview)
 
-Download a release ZIP (or build it yourself — see below), unpack anywhere, and run `Start.bat` or `ReadingLibrary.exe`.
+Download a release ZIP (or build it yourself — see below), unpack anywhere, and run `Start.bat` or `One More Chapter.exe`.
 
 - No Docker or Python install required on the target machine
 - Data lives next to the executable (`data/`, `uploads/`)
@@ -62,6 +62,8 @@ From WSL/Linux (Wine in Docker — produces a real `.exe`):
 INCLUDE_DATA=1 ./scripts/build_portable_windows.sh
 ```
 
+With `INCLUDE_DATA=1`, the script copies the library from `data/` (Docker self-host) if present, otherwise from `portable/data/` (and the matching `uploads/`).
+
 On a Windows machine (PowerShell):
 
 ```powershell
@@ -69,7 +71,7 @@ On a Windows machine (PowerShell):
 .\scripts\build_portable.ps1 -IncludeData
 ```
 
-Output: `dist/ReadingLibrary-portable-win64/` and `dist/ReadingLibrary-portable-win64-YYYYMMDD.zip`.
+Output: `dist/OneMoreChapter-portable-win64/` and `dist/OneMoreChapter-portable-win64-YYYYMMDD.zip`.
 
 ## Configuration
 
@@ -77,7 +79,7 @@ Environment variables (optional `.env` for Compose):
 
 | Variable      | Default                     | Description              |
 | ------------- | --------------------------- | ------------------------ |
-| `SQLITE_PATH` | `/data/reading_library.db`  | SQLite file (in Compose) |
+| `SQLITE_PATH` | `/data/ocm_db.db`           | SQLite file (in Compose) |
 | `UPLOADS_DIR` | `/data/uploads`             | Cover image storage      |
 | `STATIC_DIR`  | `frontend/dist`             | Built frontend assets    |
 | `APP_HOST`    | `0.0.0.0`                   | Bind address             |
@@ -118,7 +120,7 @@ From the repo (native window via pywebview):
 ./scripts/run_portable.sh
 ```
 
-Data: `portable/data/reading_library.db`, covers: `portable/uploads/`.
+Data: `portable/data/ocm_db.db`, covers: `portable/uploads/`.
 
 If port 3050 is already used by Docker Compose, stop that stack or run `APP_PORT=3051 ./scripts/run_portable.sh`.
 
@@ -131,10 +133,10 @@ docker compose up --build -d
 Or build the single runtime image:
 
 ```bash
-docker build -t reading-library .
+docker build -t one-more-chapter .
 docker run --rm -p 3050:3050 \
   -v "$(pwd)/data:/data" \
-  reading-library
+  one-more-chapter
 ```
 
 ## API overview

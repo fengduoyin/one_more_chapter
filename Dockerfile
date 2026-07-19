@@ -12,7 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     APP_HOST=0.0.0.0 \
     APP_PORT=3050 \
-    SQLITE_PATH=/data/reading_library.db \
+    SQLITE_PATH=/data/ocm_db.db \
     UPLOADS_DIR=/data/uploads \
     STATIC_DIR=backend/static
 

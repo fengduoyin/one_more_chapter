@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# Build a Windows portable Reading Library ZIP from Linux/WSL via Wine+Docker.
+# Build a Windows portable One More Chapter ZIP from Linux/WSL via Wine+Docker.
 #
 # Usage (from repo root):
 #   ./scripts/build_portable_windows.sh
 #   INCLUDE_DATA=1 ./scripts/build_portable_windows.sh
 #
 # Output:
-#   dist/ReadingLibrary-portable-win64/
-#   dist/ReadingLibrary-portable-win64-YYYYMMDD.zip
+#   dist/OneMoreChapter-portable-win64/
+#   dist/OneMoreChapter-portable-win64-YYYYMMDD.zip
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 INCLUDE_DATA="${INCLUDE_DATA:-0}"
-OUT_NAME="ReadingLibrary-portable-win64"
+OUT_NAME="OneMoreChapter-portable-win64"
+APP_NAME="One More Chapter"
 DIST_DIR="$ROOT/dist/$OUT_NAME"
 IMAGE="${PORTABLE_WINDOWS_IMAGE:-tobix/pywine:3.13}"
 FILE_IMAGE="${PORTABLE_FILE_IMAGE:-python:3.13-slim}"
@@ -60,11 +61,11 @@ docker run --rm \
     wine python -m PyInstaller --noconfirm --clean \
       --distpath Z:/src/dist/pyi-dist-win \
       --workpath Z:/src/dist/pyi-work-win \
-      packaging/reading_library.spec
+      packaging/one_more_chapter.spec
   "
 
-SRC="$ROOT/dist/pyi-dist-win/ReadingLibrary"
-if [[ ! -f "$SRC/ReadingLibrary.exe" ]]; then
+SRC="$ROOT/dist/pyi-dist-win/${APP_NAME}"
+if [[ ! -f "$SRC/${APP_NAME}.exe" ]]; then
   echo "PyInstaller Windows output missing at $SRC" >&2
   ls -la "$ROOT/dist/pyi-dist-win" >&2 || true
   ls -la "$SRC" >&2 || true
@@ -79,7 +80,7 @@ else
   docker run --rm -v "$ROOT:/src" "$FILE_IMAGE" bash -lc "
     set -euo pipefail
     mkdir -p /src/dist/${OUT_NAME}
-    cp -a /src/dist/pyi-dist-win/ReadingLibrary/. /src/dist/${OUT_NAME}/
+    cp -a '/src/dist/pyi-dist-win/${APP_NAME}/.' /src/dist/${OUT_NAME}/
   "
 fi
 cp packaging/README_PORTABLE.txt "$DIST_DIR/README.txt"
@@ -87,13 +88,20 @@ cp packaging/Start.bat "$DIST_DIR/Start.bat"
 mkdir -p "$DIST_DIR/data" "$DIST_DIR/uploads"
 
 if [[ "$INCLUDE_DATA" == "1" ]]; then
-  if [[ -f portable/data/reading_library.db ]]; then
-    cp -a portable/data/reading_library.db "$DIST_DIR/data/"
-    echo "Included existing SQLite database."
+  # Prefer Docker self-host data/, fall back to portable/ (dev portable run).
+  if [[ -f data/ocm_db.db ]]; then
+    cp -a data/ocm_db.db "$DIST_DIR/data/"
+    echo "Included SQLite database from data/."
+  elif [[ -f portable/data/ocm_db.db ]]; then
+    cp -a portable/data/ocm_db.db "$DIST_DIR/data/"
+    echo "Included SQLite database from portable/data/."
   fi
-  if [[ -d portable/uploads ]] && [[ -n "$(ls -A portable/uploads 2>/dev/null || true)" ]]; then
+  if [[ -d data/uploads ]] && [[ -n "$(ls -A data/uploads 2>/dev/null || true)" ]]; then
+    cp -a data/uploads/. "$DIST_DIR/uploads/"
+    echo "Included uploads from data/uploads/."
+  elif [[ -d portable/uploads ]] && [[ -n "$(ls -A portable/uploads 2>/dev/null || true)" ]]; then
     cp -a portable/uploads/. "$DIST_DIR/uploads/"
-    echo "Included existing uploads."
+    echo "Included uploads from portable/uploads/."
   fi
 fi
 
@@ -122,4 +130,4 @@ echo "Windows portable build ready:"
 echo "  folder: $DIST_DIR"
 echo "  zip:    $ZIP_PATH"
 echo
-echo "On Windows: unpack and run ReadingLibrary.exe (or Start.bat)."
+echo "On Windows: unpack and run \"${APP_NAME}.exe\" (or Start.bat)."

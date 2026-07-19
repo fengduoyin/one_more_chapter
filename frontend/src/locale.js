@@ -2,12 +2,13 @@
 
 import { readStorage, writeStorage } from "./storage.js";
 
-const STORAGE_KEY = "reading-library-locale";
+const STORAGE_KEY = "one-more-chapter-locale";
+const LEGACY_KEYS = ["reading-library-locale"];
 
 export const LOCALES = ["ru", "en"];
 
 export function getInitialLocale() {
-  return readStorage(STORAGE_KEY, LOCALES, "ru");
+  return readStorage(STORAGE_KEY, LOCALES, "ru", LEGACY_KEYS);
 }
 
 export function applyLocale(locale) {

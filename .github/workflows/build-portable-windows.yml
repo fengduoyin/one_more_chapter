@@ -42,21 +42,22 @@ jobs:
           pyinstaller --noconfirm --clean `
             --distpath dist/pyi-dist-win `
             --workpath dist/pyi-work-win `
-            packaging/reading_library.spec
+            packaging/one_more_chapter.spec
 
       - name: Assemble portable folder
         shell: pwsh
         run: |
-          $Out = "dist/ReadingLibrary-portable-win64"
-          $Src = "dist/pyi-dist-win/ReadingLibrary"
-          if (-not (Test-Path "$Src/ReadingLibrary.exe")) { throw "Missing ReadingLibrary.exe" }
+          $Out = "dist/OneMoreChapter-portable-win64"
+          $AppName = "One More Chapter"
+          $Src = "dist/pyi-dist-win/$AppName"
+          if (-not (Test-Path "$Src/$AppName.exe")) { throw "Missing $AppName.exe" }
           New-Item -ItemType Directory -Force -Path $Out | Out-Null
           Copy-Item -Recurse -Force "$Src/*" $Out
           Copy-Item packaging/README_PORTABLE.txt "$Out/README.txt"
           Copy-Item packaging/Start.bat "$Out/Start.bat"
           New-Item -ItemType Directory -Force -Path "$Out/data","$Out/uploads" | Out-Null
           $Stamp = Get-Date -Format "yyyyMMdd"
-          $Zip = "dist/ReadingLibrary-portable-win64-$Stamp.zip"
+          $Zip = "dist/OneMoreChapter-portable-win64-$Stamp.zip"
           if (Test-Path $Zip) { Remove-Item $Zip }
           Compress-Archive -Path $Out -DestinationPath $Zip
           echo "ZIP_PATH=$Zip" >> $env:GITHUB_ENV
@@ -64,8 +65,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ReadingLibrary-portable-win64
+          name: OneMoreChapter-portable-win64
           path: |
-            dist/ReadingLibrary-portable-win64
-            dist/ReadingLibrary-portable-win64-*.zip
+            dist/OneMoreChapter-portable-win64
+            dist/OneMoreChapter-portable-win64-*.zip
           if-no-files-found: error

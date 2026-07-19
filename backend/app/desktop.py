@@ -5,9 +5,9 @@ Repo mode:
     ./scripts/run_portable.sh
     python -m backend.app.desktop
 
-Frozen (PyInstaller) mode: double-click ReadingLibrary / ReadingLibrary.exe
+Frozen (PyInstaller) mode: double-click "One More Chapter.exe"
 
-By default opens a native window via pywebview. Set READING_LIBRARY_BROWSER=1
+By default opens a native window via pywebview. Set ONE_MORE_CHAPTER_BROWSER=1
 to force the system browser instead (useful in Docker / headless environments).
 """
 
@@ -58,7 +58,16 @@ def configure_portable_env(root: Path | None = None) -> Path:
     data_dir.mkdir(parents=True, exist_ok=True)
     uploads_dir.mkdir(parents=True, exist_ok=True)
 
-    os.environ.setdefault("SQLITE_PATH", str(data_dir / "reading_library.db"))
+    db_path = data_dir / "ocm_db.db"
+    legacy_db = data_dir / "reading_library.db"
+    if not db_path.exists() and legacy_db.exists():
+        try:
+            legacy_db.rename(db_path)
+        except OSError:
+            # Fall back to legacy path if rename is blocked (e.g. root-owned file).
+            db_path = legacy_db
+
+    os.environ.setdefault("SQLITE_PATH", str(db_path))
     os.environ.setdefault("UPLOADS_DIR", str(uploads_dir))
     os.environ.setdefault("STATIC_DIR", str(static_dir))
     os.environ.setdefault("APP_HOST", "127.0.0.1")
@@ -315,7 +324,7 @@ def _open_native_window(url: str, root: Path) -> bool:
         details = traceback.format_exc()
         print(details, flush=True)
         _notify_user(
-            "Reading Library",
+            "One More Chapter",
             "Не удалось загрузить компонент окна (pywebview/pythonnet).\n\n"
             f"{exc}\n\n"
             "Запустите через Start.bat или разблокируйте файлы в свойствах ZIP.\n"
@@ -329,7 +338,7 @@ def _open_native_window(url: str, root: Path) -> bool:
         storage_path.mkdir(parents=True, exist_ok=True)
 
         window = webview.create_window(
-            "Reading Library",
+            "One More Chapter",
             url,
             width=geometry["width"],
             height=geometry["height"],
@@ -355,7 +364,7 @@ def _open_native_window(url: str, root: Path) -> bool:
         details = traceback.format_exc()
         print(details, flush=True)
         _notify_user(
-            "Reading Library",
+            "One More Chapter",
             "Не удалось открыть нативное окно.\n\n"
             f"{exc}\n\n"
             "Нужен Microsoft Edge WebView2 Runtime.\n"
@@ -388,7 +397,7 @@ def main() -> None:
     open_host = "127.0.0.1" if host in {"0.0.0.0", "::", "[::]"} else host
     url = f"http://{open_host}:{port}"
 
-    print(f"Reading Library (portable) → {url}", flush=True)
+    print(f"One More Chapter (portable) → {url}", flush=True)
     print(f"Database: {settings.sqlite_path}", flush=True)
     print(f"Uploads:  {settings.uploads_dir}", flush=True)
 
@@ -396,7 +405,9 @@ def main() -> None:
     try:
         _wait_for_server(url)
 
-        force_browser = _env_flag("READING_LIBRARY_BROWSER")
+        force_browser = _env_flag("ONE_MORE_CHAPTER_BROWSER") or _env_flag(
+            "READING_LIBRARY_BROWSER"
+        )
         used_native = False
         if not force_browser:
             used_native = _open_native_window(url, root)

@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""PyInstaller spec for Reading Library portable build.
+"""PyInstaller spec for One More Chapter portable build.
 
 Built by scripts/build_portable_windows.sh (or build_portable.ps1) from the repo root.
 """
@@ -13,6 +13,8 @@ from PyInstaller.utils.hooks import collect_all, collect_dynamic_libs, collect_s
 
 ROOT = Path.cwd().resolve()
 FRONTEND_DIST = ROOT / "frontend" / "dist"
+APP_ICON = ROOT / "packaging" / "app_icon.ico"
+APP_NAME = "One More Chapter"
 
 if not (FRONTEND_DIST / "index.html").exists():
     raise SystemExit(f"Missing frontend build at {FRONTEND_DIST} — run npm run build first")
@@ -87,7 +89,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="ReadingLibrary",
+    name=APP_NAME,
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -95,6 +97,7 @@ exe = EXE(
     # Hide the console on Windows so the app feels like a normal GUI program.
     # Linux keeps a console for easier troubleshooting in portable builds.
     console=(sys.platform != "win32"),
+    icon=str(APP_ICON) if APP_ICON.is_file() else None,
 )
 
 coll = COLLECT(
@@ -104,5 +107,5 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=False,
-    name="ReadingLibrary",
+    name=APP_NAME,
 )

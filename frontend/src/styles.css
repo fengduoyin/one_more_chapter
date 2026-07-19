@@ -271,7 +271,7 @@ body{
   font-size:16px;
   line-height:1;
 }
-.header{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .appMain{
   flex:1;
   min-height:0;
@@ -685,6 +685,28 @@ body{
   background-clip:padding-box;
 }
 .panelShellBody::-webkit-scrollbar-track{background:transparent}
+.brandBlock{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.brandLogo{
+  /* Match brand title + tagline block height */
+  height:calc(var(--text-page-title-size) * 1.25 + 2px + var(--text-secondary-size) * 1.35);
+  width:auto;
+  aspect-ratio:1;
+  object-fit:contain;
+  flex:0 0 auto;
+  display:block;
+}
+[data-theme="light"] .brandLogo{
+  /* Soft indigo haze */
+  filter:drop-shadow(0 2px 5px rgba(37, 31, 102, .65))
+         drop-shadow(0 4px 12px rgba(37, 31, 102, .45))
+         drop-shadow(0 0 18px rgba(37, 31, 102, .20));
+}
+.brandText{min-width:0}
 .brand{
   font-family:var(--font-sans);
   font-size:var(--text-page-title-size);

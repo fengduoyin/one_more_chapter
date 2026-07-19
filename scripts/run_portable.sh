@@ -13,7 +13,10 @@ if [[ ! -f frontend/dist/index.html ]]; then
   (cd frontend && npm run build)
 fi
 
-export SQLITE_PATH="${SQLITE_PATH:-$ROOT/portable/data/reading_library.db}"
+export SQLITE_PATH="${SQLITE_PATH:-$ROOT/portable/data/ocm_db.db}"
+if [[ ! -f "$SQLITE_PATH" && -f "$ROOT/portable/data/reading_library.db" ]]; then
+  export SQLITE_PATH="$ROOT/portable/data/reading_library.db"
+fi
 export UPLOADS_DIR="${UPLOADS_DIR:-$ROOT/portable/uploads}"
 export STATIC_DIR="${STATIC_DIR:-$ROOT/frontend/dist}"
 export APP_HOST="${APP_HOST:-127.0.0.1}"
@@ -21,7 +24,7 @@ export APP_PORT="${APP_PORT:-3050}"
 
 # Docker / headless: no display → use system browser fallback (or open URL manually).
 if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
-  export READING_LIBRARY_BROWSER="${READING_LIBRARY_BROWSER:-1}"
+  export ONE_MORE_CHAPTER_BROWSER="${ONE_MORE_CHAPTER_BROWSER:-1}"
 fi
 
 run_with_venv() {
@@ -33,21 +36,21 @@ run_with_venv() {
 }
 
 run_with_docker() {
-  local image="${PORTABLE_DOCKER_IMAGE:-reading-library-app:latest}"
+  local image="${PORTABLE_DOCKER_IMAGE:-one-more-chapter-app:latest}"
   if ! docker image inspect "$image" >/dev/null 2>&1; then
     echo "Docker image '$image' not found. Build once with: docker compose build" >&2
     exit 1
   fi
   echo "Starting portable app via Docker ($image)…"
-  exec docker run --rm --name reading-library-portable \
+  exec docker run --rm --name one-more-chapter-portable \
     -p "${APP_PORT}:${APP_PORT}" \
     -v "$ROOT:/app" -w /app \
-    -e SQLITE_PATH=/app/portable/data/reading_library.db \
+    -e SQLITE_PATH=/app/portable/data/ocm_db.db \
     -e UPLOADS_DIR=/app/portable/uploads \
     -e STATIC_DIR=/app/frontend/dist \
     -e APP_HOST=0.0.0.0 \
     -e APP_PORT="$APP_PORT" \
-    -e READING_LIBRARY_BROWSER=1 \
+    -e ONE_MORE_CHAPTER_BROWSER=1 \
     "$image" \
     python -m backend.app.desktop
 }

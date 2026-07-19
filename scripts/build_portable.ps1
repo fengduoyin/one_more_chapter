@@ -1,12 +1,12 @@
-# Build Reading Library portable for Windows (run on a Windows machine).
+# Build One More Chapter portable for Windows (run on a Windows machine).
 #
 # Usage (from repo root in PowerShell):
 #   .\scripts\build_portable.ps1
 #   .\scripts\build_portable.ps1 -IncludeData
 #
 # Output:
-#   dist\ReadingLibrary-portable-win64\
-#   dist\ReadingLibrary-portable-win64-YYYYMMDD.zip
+#   dist\OneMoreChapter-portable-win64\
+#   dist\OneMoreChapter-portable-win64-YYYYMMDD.zip
 
 param(
   [switch]$IncludeData
@@ -16,7 +16,8 @@ $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $Root
 
-$OutName = "ReadingLibrary-portable-win64"
+$OutName = "OneMoreChapter-portable-win64"
+$AppName = "One More Chapter"
 $DistDir = Join-Path $Root "dist\$OutName"
 $Stamp = Get-Date -Format "yyyyMMdd"
 $ZipPath = Join-Path $Root "dist\${OutName}-${Stamp}.zip"
@@ -45,11 +46,11 @@ New-Item -ItemType Directory -Force -Path (Join-Path $Root "dist") | Out-Null
 & "$venv\Scripts\pyinstaller.exe" --noconfirm --clean `
   --distpath $PyiDist `
   --workpath $PyiWork `
-  packaging\reading_library.spec
+  packaging\one_more_chapter.spec
 
-$Src = Join-Path $PyiDist "ReadingLibrary"
-if (-not (Test-Path (Join-Path $Src "ReadingLibrary.exe"))) {
-  throw "PyInstaller output missing: $Src\ReadingLibrary.exe"
+$Src = Join-Path $PyiDist $AppName
+if (-not (Test-Path (Join-Path $Src "$AppName.exe"))) {
+  throw "PyInstaller output missing: $Src\$AppName.exe"
 }
 
 New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
@@ -60,14 +61,22 @@ New-Item -ItemType Directory -Force -Path (Join-Path $DistDir "data") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $DistDir "uploads") | Out-Null
 
 if ($IncludeData) {
-  $db = "portable\data\reading_library.db"
-  if (Test-Path $db) {
-    Copy-Item $db (Join-Path $DistDir "data\reading_library.db")
-    Write-Host "Included existing SQLite database."
+  # Prefer Docker self-host data/, fall back to portable/ (dev portable run).
+  $dbDocker = "data\ocm_db.db"
+  $dbPortable = "portable\data\ocm_db.db"
+  if (Test-Path $dbDocker) {
+    Copy-Item $dbDocker (Join-Path $DistDir "data\ocm_db.db")
+    Write-Host "Included SQLite database from data/."
+  } elseif (Test-Path $dbPortable) {
+    Copy-Item $dbPortable (Join-Path $DistDir "data\ocm_db.db")
+    Write-Host "Included SQLite database from portable/data/."
   }
-  if (Test-Path "portable\uploads") {
+  if ((Test-Path "data\uploads") -and (Get-ChildItem "data\uploads" -Force -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+    Copy-Item -Recurse -Force "data\uploads\*" (Join-Path $DistDir "uploads")
+    Write-Host "Included uploads from data/uploads/."
+  } elseif ((Test-Path "portable\uploads") -and (Get-ChildItem "portable\uploads" -Force -ErrorAction SilentlyContinue | Select-Object -First 1)) {
     Copy-Item -Recurse -Force "portable\uploads\*" (Join-Path $DistDir "uploads")
-    Write-Host "Included existing uploads."
+    Write-Host "Included uploads from portable/uploads/."
   }
 }
 
@@ -81,4 +90,4 @@ Write-Host "Windows portable build ready:"
 Write-Host "  folder: $DistDir"
 Write-Host "  zip:    $ZipPath"
 Write-Host ""
-Write-Host "Run: $DistDir\ReadingLibrary.exe"
+Write-Host "Run: $DistDir\$AppName.exe"

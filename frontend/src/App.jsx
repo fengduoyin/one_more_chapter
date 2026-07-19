@@ -9,6 +9,7 @@ import LocaleToggle from "./components/LocaleToggle.jsx";
 import StatisticsPanel from "./components/StatisticsPanel.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
 import { useLocale } from "./i18n/LocaleContext.jsx";
+import brandLogo from "./assets/brand/logo_icon.png";
 
 function BrandTitle({ text }) {
   return (
@@ -74,9 +75,12 @@ export default function App() {
   return (
     <div className="page">
       <header className="header appHeader">
-        <div>
-          <BrandTitle text={t("brand.title")} />
-          <div className="brandTagline">{t("brand.tagline")}</div>
+        <div className="brandBlock">
+          <img className="brandLogo" src={brandLogo} alt="" />
+          <div className="brandText">
+            <BrandTitle text={t("brand.title")} />
+            <div className="brandTagline">{t("brand.tagline")}</div>
+          </div>
         </div>
         <div className="row appNav">
           <ThemeToggle />
@@ -132,7 +136,7 @@ export default function App() {
         </main>
       ) : tab === "calendar" ? (
         <main className="card appMain statsCard">
-          <CalendarPanel />
+          <CalendarPanel onBooksChanged={() => reloadBooks().catch(() => {})} />
         </main>
       ) : (
         <main className="card appMain statsCard">

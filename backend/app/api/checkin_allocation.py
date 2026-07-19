@@ -64,10 +64,15 @@ def effective_words_map(db: Session, checkins: list[Checkin]) -> dict[int, int]:
 
     result: dict[int, int] = {}
     for checkin in checkins:
-        if checkin.book_id is None or checkin.book_id not in allocation_by_book:
-            result[checkin.id] = int(checkin.words_delta)
+        stored = int(checkin.words_delta)
+        if stored > 0:
+            # Prefer what the user entered — same rule as pages.
+            result[checkin.id] = stored
             continue
-        result[checkin.id] = allocation_by_book[checkin.book_id].get(checkin.day, int(checkin.words_delta))
+        if checkin.book_id is None or checkin.book_id not in allocation_by_book:
+            result[checkin.id] = stored
+            continue
+        result[checkin.id] = allocation_by_book[checkin.book_id].get(checkin.day, stored)
     return result
 
 
