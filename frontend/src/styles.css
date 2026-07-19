@@ -124,13 +124,46 @@
   --control-height:42px;
 }
 
+:root{
+  --font-sans:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Page title */
+  --text-page-title-size:22px;
+  --text-page-title-weight:600;
+
+  /* Section title */
+  --text-section-title-size:16px;
+  --text-section-title-weight:600;
+
+  /* Body */
+  --text-body-size:14px;
+  --text-body-weight:400;
+
+  /* Secondary information */
+  --text-secondary-size:13px;
+  --text-secondary-weight:400;
+
+  /* Statistics (18–22) */
+  --text-stats-size:20px;
+  --text-stats-size-lg:22px;
+  --text-stats-size-sm:18px;
+  --text-stats-weight:500;
+
+  /* Buttons */
+  --text-button-size:14px;
+  --text-button-weight:500;
+}
+
 *{box-sizing:border-box}
 html,body,#root{height:100%}
 html{overflow:hidden}
 body{
   margin:0;
   overflow:hidden;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:var(--font-sans);
+  font-size:var(--text-body-size);
+  font-weight:var(--text-body-weight);
+  line-height:1.45;
   background: radial-gradient(1200px 700px at 10% 10%, var(--gradient-1), transparent 60%),
               radial-gradient(900px 600px at 90% 20%, var(--gradient-2), transparent 55%),
               var(--bg);
@@ -158,8 +191,8 @@ body{
   min-width:var(--control-height);
   width:3.25rem;
   padding:0;
-  font-size:12px;
-  font-weight:600;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   letter-spacing:.04em;
 }
 .appNavTab{
@@ -236,18 +269,23 @@ body{
   gap:10px;
 }
 .statsYearNavLabel{min-width:4ch; text-align:center}
-.statsHero{font-size:15px; line-height:1.45}
-.statsHeroMeta{font-size:13px}
-.statsError{color:#ff8f8f; font-size:13px}
+.statsHero{font-size:var(--text-body-size); line-height:1.45}
+.statsHeroMeta{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight)}
+.statsError{color:#ff8f8f; font-size:var(--text-secondary-size)}
 .statsMetricCard{
   display:flex;
   flex-direction:column;
   gap:8px;
   min-height:108px;
 }
-.statsMetricLabel{font-size:12px; color:var(--muted)}
-.statsMetricValue{font-size:24px; line-height:1.1; letter-spacing:-.02em}
-.statsMetricHint{font-size:12px; margin-top:auto}
+.statsMetricLabel{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight); color:var(--muted)}
+.statsMetricValue{
+  font-size:var(--text-stats-size-lg);
+  font-weight:var(--text-stats-weight);
+  line-height:1.1;
+  letter-spacing:-.02em;
+}
+.statsMetricHint{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight); margin-top:auto}
 .statsSummaryBusy{opacity:.65; pointer-events:none}
 .statsCharts{
   display:flex;
@@ -272,9 +310,12 @@ body{
   justify-content:space-between;
   gap:12px;
 }
-.statsSectionTitle{font-size:14px}
-.statsSectionHint{font-size:12px; margin-top:4px}
-.statsSectionEmpty{font-size:13px}
+.statsSectionTitle{
+  font-size:var(--text-section-title-size);
+  font-weight:var(--text-section-title-weight);
+}
+.statsSectionHint{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight); margin-top:4px}
+.statsSectionEmpty{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight)}
 .statsHeatmapWrap{
   display:flex;
   gap:8px;
@@ -368,11 +409,13 @@ body{
   gap:6px;
 }
 .statsHeatmapPopoverValue{
-  font-size:18px;
+  font-size:var(--text-stats-size-sm);
+  font-weight:var(--text-stats-weight);
   line-height:1.1;
 }
 .statsHeatmapPopoverEmpty{
-  font-size:13px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
 }
 .statsHeatmapLevel1{background:var(--heatmap-none)}
 .statsHeatmapLevel2{background:rgba(var(--accent-rgb),.22)}
@@ -526,8 +569,8 @@ body{
   transform:none;
 }
 .statsMonthBarTooltipTitle{
-  font-size:13px;
-  font-weight:600;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-section-title-weight);
   line-height:1.3;
   margin-bottom:8px;
 }
@@ -535,7 +578,8 @@ body{
   display:flex;
   align-items:center;
   gap:8px;
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   line-height:1.35;
 }
 .statsMonthBarTooltipDot{
@@ -570,8 +614,17 @@ body{
   background-clip:padding-box;
 }
 .panelShellBody::-webkit-scrollbar-track{background:transparent}
-.brand{font-size:18px;letter-spacing:.3px}
-.muted{color:var(--muted)}
+.brand{
+  font-size:var(--text-page-title-size);
+  font-weight:var(--text-page-title-weight);
+  letter-spacing:.3px;
+  line-height:1.25;
+}
+.muted{
+  color:var(--muted);
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+}
 .card{
   background:linear-gradient(180deg, var(--surface-1), var(--surface-2));
   border:1px solid var(--border);
@@ -586,9 +639,14 @@ body{
   padding: 14px;
 }
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.title{font-size:16px}
+.title{
+  font-size:var(--text-section-title-size);
+  font-weight:var(--text-section-title-weight);
+  line-height:1.3;
+}
 .pill{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   padding:6px 10px;
   border-radius:999px;
   border:1px solid var(--accent-border);
@@ -603,6 +661,9 @@ body{
   border: 1px solid var(--border-soft);
   background: var(--surface-1);
   color: var(--text);
+  font-family:inherit;
+  font-size:var(--text-button-size);
+  font-weight:var(--text-button-weight);
   cursor: pointer;
   display:inline-flex;
   align-items:center;
@@ -678,7 +739,8 @@ body{
   flex:1 1 auto;
 }
 .confirmDialogMessage{
-  font-size:14px;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-body-weight);
   line-height:1.45;
 }
 .confirmDialogActions{
@@ -696,6 +758,9 @@ body{
   border: 1px solid var(--border);
   background:var(--control-bg);
   color: var(--text);
+  font-family:inherit;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-body-weight);
   outline: none;
   box-sizing:border-box;
   line-height:1.25;
@@ -717,6 +782,9 @@ select.input{
   border: 1px solid var(--border);
   background-color:var(--control-bg);
   color: var(--text);
+  font-family:inherit;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-body-weight);
   outline: none;
   appearance: none;
   -webkit-appearance: none;
@@ -784,6 +852,9 @@ select.input option:hover{
   background-image:none;
   box-sizing:border-box;
   line-height:1.25;
+  font-family:inherit;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-body-weight);
 }
 .selectMenuValue{
   overflow:hidden;
@@ -851,7 +922,12 @@ select.input option:hover{
 }
 
 .textarea{resize: vertical}
-.label{font-size:12px; color: var(--muted); margin-bottom: 6px}
+.label{
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+  color: var(--muted);
+  margin-bottom: 6px;
+}
 .form{display:flex; flex-direction:column; gap:10px}
 .formRow{display:flex; flex-direction:column}
 .formRowRight{justify-content:flex-end}
@@ -903,6 +979,9 @@ select.input option:hover{
   display:flex;
   align-items:center;
   justify-content:center;
+  font-family:inherit;
+  font-size:var(--text-button-size);
+  font-weight:var(--text-button-weight);
   transition:background-color .15s ease, color .15s ease;
 }
 .viewToggleBtn:first-child{border-radius:9px 0 0 9px}
@@ -999,13 +1078,14 @@ select.input option:hover{
   display:flex;
   flex-direction:column;
   gap:6px;
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   line-height:1.35;
   color:#fff;
 }
 .bookTileOverlayTitle{
-  font-size:13px;
-  font-weight:600;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-button-weight);
   line-height:1.35;
   color:#fff;
 }
@@ -1088,9 +1168,9 @@ select.input option:hover{
 }
 .libraryTable tbody td{padding-top:20px; padding-bottom:20px}
 .libraryTable th{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
   color:var(--muted);
-  font-weight:500;
+  font-weight:var(--text-button-weight);
   background:var(--surface-2);
   vertical-align:middle;
   padding-top:12px;
@@ -1113,11 +1193,21 @@ select.input option:hover{
   flex:0 0 auto;
 }
 .libraryTableTitleMeta{min-width:0; flex:1}
-.libraryTableTitle{font-size:15px; font-weight:500; line-height:1.35}
-.libraryTableAuthor{font-size:13px; margin-top:4px; line-height:1.35}
+.libraryTableTitle{
+  font-size:var(--text-body-size);
+  font-weight:var(--text-button-weight);
+  line-height:1.35;
+}
+.libraryTableAuthor{
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+  margin-top:4px;
+  line-height:1.35;
+}
 .libraryTableSynopsis{
   margin-top:8px;
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   line-height:1.45;
   display:-webkit-box;
   -webkit-box-orient:vertical;
@@ -1126,7 +1216,11 @@ select.input option:hover{
   word-break:break-word;
 }
 .libraryTableProgress{min-width:0; padding-top:4px}
-.libraryTableProgressValue{font-size:13px; margin-bottom:6px}
+.libraryTableProgressValue{
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+  margin-bottom:6px;
+}
 .libraryTableProgressBar{height:5px}
 .libraryTableNumeric{
   font-variant-numeric:tabular-nums;
@@ -1160,8 +1254,12 @@ select.input option:hover{
   white-space:nowrap;
 }
 
-.error{color:#ffb4b4; font-size: 13px}
-.big{font-size:22px; margin-top: 6px}
+.error{color:#ffb4b4; font-size:var(--text-secondary-size)}
+.big{
+  font-size:var(--text-stats-size-lg);
+  font-weight:var(--text-stats-weight);
+  margin-top: 6px;
+}
 
 .bookCard{
   width:100%;
@@ -1188,17 +1286,29 @@ select.input option:hover{
 .bookCover img{width:100%; height:100%; object-fit:cover; display:block}
 .coverStub{height:100%; display:flex; align-items:center; justify-content:center; color:var(--muted)}
 .bookMeta{flex:1; min-width:0}
-.bookTitle{font-size:15px; font-weight:500}
-.bookAuthor{margin-top:2px; font-size:13px}
+.bookTitle{
+  font-size:var(--text-body-size);
+  font-weight:var(--text-button-weight);
+}
+.bookAuthor{
+  margin-top:2px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+}
 .bookDesc{
   margin-top:8px;
-  font-size:13px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   line-height:1.45;
   white-space:pre-wrap;
   max-height:calc(1.45em * 2);
   overflow:hidden;
 }
-.bookDates{margin-top:6px; font-size:12px}
+.bookDates{
+  margin-top:6px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+}
 .bookRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px}
 .progress{height:6px; border-radius:999px; background: var(--surface-3); overflow:hidden; margin-top:8px}
 .progressBar{height:100%; background: var(--progress-fill)}
@@ -1234,7 +1344,10 @@ select.input option:hover{
   flex-wrap:wrap;
   align-items:center;
 }
-.bookDetailMetaText{font-size:13px}
+.bookDetailMetaText{
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+}
 .bookDetailMetaTime{
   display:inline-flex;
   align-items:center;
@@ -1283,7 +1396,8 @@ select.input option:hover{
   flex-wrap:wrap;
 }
 .bookDetailDesc{
-  font-size:14px;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-body-weight);
   line-height:1.5;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
@@ -1315,7 +1429,8 @@ select.input option:hover{
 .bookDetailCoverBtn{
   width:100%;
   padding:0 8px;
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   white-space:normal;
   line-height:1.25;
   min-height:var(--control-height);
@@ -1344,7 +1459,8 @@ select.input option:hover{
   background:var(--accent-soft);
 }
 .bookDetailQuickCheckinHint{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   margin-top:4px;
 }
 .bookDetailQuickCheckinModes{
@@ -1353,7 +1469,8 @@ select.input option:hover{
   margin-top:10px;
 }
 .bookDetailQuickCheckinMode{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   padding:6px 12px;
   border-radius:999px;
   border:1px solid var(--border-faint);
@@ -1373,7 +1490,7 @@ select.input option:hover{
   gap:10px;
   margin-top:10px;
 }
-.bookDetailQuickCheckinPreview{font-size:12px; margin-top:4px}
+.bookDetailQuickCheckinPreview{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight); margin-top:4px}
 .bookDetailQuickCheckinActions{justify-content:flex-end}
 .bookDetailTimeRow{
   display:grid;
@@ -1428,15 +1545,16 @@ select.input option:hover{
 }
 .readingTimerDisplay{
   font-variant-numeric:tabular-nums;
-  font-size:15px;
-  font-weight:650;
+  font-size:var(--text-stats-size-sm);
+  font-weight:var(--text-stats-weight);
   letter-spacing:.02em;
   line-height:1.15;
   color:var(--muted);
 }
 .readingTimerLive .readingTimerDisplay{color:var(--text)}
 .readingTimerCaption{
-  font-size:11px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   line-height:1.2;
 }
 .readingTimerToggle{
@@ -1508,7 +1626,10 @@ select.input option:hover{
   border-color:var(--goal-missed-border);
   background:var(--goal-missed-bg);
 }
-.goalTitle{font-size:14px}
+.goalTitle{
+  font-size:var(--text-section-title-size);
+  font-weight:var(--text-section-title-weight);
+}
 .goalMain{min-width:0; flex:1}
 .goalRight{min-width:0; flex:1}
 .goalActions{justify-content:flex-end; gap:8px; flex-wrap:wrap}
@@ -1565,7 +1686,8 @@ select.input option:hover{
 }
 .daysWrap{display:flex; flex-wrap:wrap; gap:8px}
 .dayChip{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   padding:6px 10px;
   border-radius:999px;
   border:1px solid var(--border-soft);
@@ -1642,8 +1764,8 @@ select.input option:hover{
 }
 .monthYearPickerYearBtn:hover{border-color:rgba(var(--accent-rgb),.35)}
 .monthYearPickerYear{
-  font-size:16px;
-  font-weight:500;
+  font-size:var(--text-section-title-size);
+  font-weight:var(--text-section-title-weight);
 }
 .monthYearPickerGrid{
   display:grid;
@@ -1674,7 +1796,8 @@ select.input option:hover{
   flex-wrap:wrap;
 }
 .calendarBadge{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   padding:6px 10px;
   border-radius:999px;
   border:1px solid var(--border-soft);
@@ -1692,7 +1815,8 @@ select.input option:hover{
   flex-wrap:wrap;
 }
 .calendarMonthChip{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   padding:6px 10px;
   border-radius:999px;
   border:1px solid var(--border-faint);
@@ -1707,7 +1831,7 @@ select.input option:hover{
   color:var(--text);
 }
 .calWeek{display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; margin-bottom:8px}
-.calWeekday{font-size:12px; color:var(--muted); text-align:center}
+.calWeekday{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight); color:var(--muted); text-align:center}
 .calGrid{display:grid; grid-template-columns:repeat(7, 1fr); gap:8px}
 .calCell{
   border-radius:14px;
@@ -1758,7 +1882,7 @@ select.input option:hover{
   gap:2px;
   min-width:0;
 }
-.calCellTime{font-size:12px; line-height:1.2}
+.calCellTime{font-size:var(--text-secondary-size); font-weight:var(--text-secondary-weight); line-height:1.2}
 .calCellTimeMuted{color:var(--muted)}
 .calCellMore{
   font-size:10px;
@@ -1816,7 +1940,8 @@ select.input option:hover{
   gap:12px;
   margin-top:12px;
   color:var(--muted);
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   flex-wrap:wrap;
 }
 .legendItem{display:flex; align-items:center; gap:8px}
@@ -1855,8 +1980,15 @@ select.input option:hover{
   padding-top:14px;
   border-top:1px solid var(--surface-3);
 }
-.calRunsTitle{font-size:14px; margin-bottom:8px}
-.calRunsEmpty{font-size:13px}
+.calRunsTitle{
+  font-size:var(--text-section-title-size);
+  font-weight:var(--text-section-title-weight);
+  margin-bottom:8px;
+}
+.calRunsEmpty{
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+}
 .calRunsTrack{
   position:relative;
   display:grid;
@@ -1879,7 +2011,8 @@ select.input option:hover{
 }
 .calRunsList{display:flex; flex-wrap:wrap; gap:8px}
 .calRunsChip{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   padding:6px 10px;
   border-radius:999px;
   border:1px solid rgba(var(--accent-rgb),.22);
@@ -1935,13 +2068,22 @@ select.input option:hover{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   color:var(--muted);
   background:var(--heatmap-empty);
   border:1px solid var(--border-faint);
 }
-.calTimelineTitle{font-size:14px; line-height:1.3}
-.calTimelineMeta{font-size:12px; margin-top:4px}
+.calTimelineTitle{
+  font-size:var(--text-body-size);
+  font-weight:var(--text-button-weight);
+  line-height:1.3;
+}
+.calTimelineMeta{
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
+  margin-top:4px;
+}
 .calTimelineNote{
   font-size:13px;
   margin-top:6px;
@@ -1967,7 +2109,11 @@ select.input option:hover{
   gap:14px;
   margin-top:0;
 }
-.calDayAddTitle{font-size:14px; margin:0}
+.calDayAddTitle{
+  font-size:var(--text-section-title-size);
+  font-weight:var(--text-section-title-weight);
+  margin:0;
+}
 .calDayFormActions{
   justify-content:flex-end;
   gap:10px;
@@ -2022,14 +2168,16 @@ select.input option:hover{
 }
 .bookPickerTriggerMeta{min-width:0}
 .bookPickerTriggerTitle{
-  font-size:14px;
+  font-size:var(--text-body-size);
+  font-weight:var(--text-button-weight);
   line-height:1.3;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
 .bookPickerTriggerAuthor{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   margin-top:2px;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -2047,7 +2195,8 @@ select.input option:hover{
 .bookPickerSearch{width:100%}
 .bookPickerFilters{display:flex; gap:8px; flex-wrap:wrap}
 .bookPickerFilter{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   padding:6px 10px;
   border-radius:999px;
   border:1px solid var(--border-faint);
@@ -2128,7 +2277,8 @@ select.input option:hover{
 }
 .bookPickerTileMeta{display:flex; flex-direction:column; gap:4px; min-width:0}
 .bookPickerTileTitle{
-  font-size:12px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-button-weight);
   line-height:1.3;
   display:-webkit-box;
   -webkit-line-clamp:2;
@@ -2136,7 +2286,8 @@ select.input option:hover{
   overflow:hidden;
 }
 .bookPickerTileAuthor{
-  font-size:11px;
+  font-size:var(--text-secondary-size);
+  font-weight:var(--text-secondary-weight);
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;

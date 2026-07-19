@@ -1,8 +1,8 @@
 export const messages = {
   ru: {
     brand: {
-      title: "Reading Library",
-      tagline: "минималистичный читательский дневник"
+      title: "One More Chapter",
+      tagline: "твой личный читательский дневник"
     },
     nav: {
       library: "Книги",
@@ -270,8 +270,8 @@ export const messages = {
   },
   en: {
     brand: {
-      title: "Reading Library",
-      tagline: "a minimalist reading diary"
+      title: "One More Chapter",
+      tagline: "your personal reading diary"
     },
     nav: {
       library: "Books",
