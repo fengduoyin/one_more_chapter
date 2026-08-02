@@ -19,9 +19,19 @@ export function bookStatusLabel(status, t) {
   return bookStatusOptions(t).find((option) => option.value === status)?.label || status;
 }
 
-export function formatBookTitle(title, volume) {
-  if (!volume) return title;
-  return `${title} — ${volume}`;
+export function bookSeriesLabel(series, title) {
+  if (!series) return null;
+  if (series.trim() === (title || "").trim()) return null;
+  return series;
+}
+
+export function formatBookNumber(number, t) {
+  if (number == null || number === "") return null;
+  return t("common.volLabel", { number });
+}
+
+export function formatBookTitle(title, number, series, t) {
+  return [bookSeriesLabel(series, title), title, formatBookNumber(number, t)].filter(Boolean).join(" — ");
 }
 
 export function formatReadingDates(book, t) {
@@ -127,7 +137,16 @@ export function filterLibraryBooks(books, query) {
   const q = query.trim().toLowerCase();
   if (!q) return books;
   return books.filter((book) => {
-    const haystack = [book.title, book.author, book.volume, formatBookTitle(book.title, book.volume)]
+    const haystack = [
+      book.title,
+      book.author,
+      book.series,
+      book.number != null ? String(book.number) : null,
+      book.number != null ? `Vol. ${book.number}` : null,
+      book.number != null ? `Книга ${book.number}` : null,
+      bookSeriesLabel(book.series, book.title),
+      book.title
+    ]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
@@ -142,8 +161,29 @@ const LIBRARY_STATUS_ORDER = {
   abandoned: 3
 };
 
+function compareText(a, b, locale) {
+  return (a || "").localeCompare(b || "", intlLocale(locale), { sensitivity: "base" });
+}
+
 function compareTitle(a, b, locale) {
-  return a.title.localeCompare(b.title, intlLocale(locale), { sensitivity: "base" });
+  return compareText(a.title, b.title, locale);
+}
+
+function compareSeries(a, b, locale) {
+  return compareText(a.series, b.series, locale);
+}
+
+function compareNumber(a, b) {
+  const an = a.number;
+  const bn = b.number;
+  if (an == null && bn == null) return 0;
+  if (an == null) return 1;
+  if (bn == null) return -1;
+  return an - bn;
+}
+
+function compareSeriesThenNumber(a, b, locale) {
+  return compareSeries(a, b, locale) || compareNumber(a, b);
 }
 
 export function sortLibraryBooks(books, locale) {
@@ -151,14 +191,27 @@ export function sortLibraryBooks(books, locale) {
     const statusDiff = (LIBRARY_STATUS_ORDER[a.status] ?? 99) - (LIBRARY_STATUS_ORDER[b.status] ?? 99);
     if (statusDiff !== 0) return statusDiff;
 
-    if (a.status === "finished") {
-      const aEnd = a.end_date || "";
-      const bEnd = b.end_date || "";
-      if (aEnd !== bEnd) return bEnd.localeCompare(aEnd);
-      return compareTitle(a, b, locale);
+    if (a.status === "reading") {
+      const aDay = a.last_checkin_day || "";
+      const bDay = b.last_checkin_day || "";
+      if (aDay !== bDay) return bDay.localeCompare(aDay);
     }
 
-    return compareTitle(a, b, locale);
+    const aEnd = a.end_date || "";
+    const bEnd = b.end_date || "";
+    if (aEnd || bEnd) {
+      // Newest finished first; books without end_date after those with one.
+      if (aEnd !== bEnd) return bEnd.localeCompare(aEnd);
+    }
+
+    if (a.status === "finished") {
+      const aStart = a.start_date || "";
+      const bStart = b.start_date || "";
+      // Same end date: later start ranks higher (earlier start lower).
+      if (aStart !== bStart) return bStart.localeCompare(aStart);
+    }
+
+    return compareSeriesThenNumber(a, b, locale);
   });
 }
 
@@ -167,9 +220,12 @@ export function sortLibraryBooksBy(books, sortBy, locale) {
   switch (sortBy) {
     case "title":
       return sorted.sort((a, b) => compareTitle(a, b, locale));
+    case "series":
+      return sorted.sort((a, b) => compareSeriesThenNumber(a, b, locale));
     case "author":
-      return sorted.sort((a, b) =>
-        a.author.localeCompare(b.author, intlLocale(locale), { sensitivity: "base" })
+      return sorted.sort(
+        (a, b) =>
+          compareText(a.author, b.author, locale) || compareSeriesThenNumber(a, b, locale)
       );
     case "added":
       return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));

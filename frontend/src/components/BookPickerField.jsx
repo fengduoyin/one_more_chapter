@@ -37,7 +37,7 @@ export default function BookPickerField({
             <BookCoverThumb book={selectedBook} className="bookPickerTriggerCover" />
             <div className="bookPickerTriggerMeta">
               <div className="bookPickerTriggerTitle">
-                {formatBookTitle(selectedBook.title, selectedBook.volume)}
+                {formatBookTitle(selectedBook.title, selectedBook.number, selectedBook.series, t)}
               </div>
               <div className="muted bookPickerTriggerAuthor">{selectedBook.author}</div>
             </div>

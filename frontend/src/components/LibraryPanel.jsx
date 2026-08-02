@@ -38,6 +38,7 @@ export default function LibraryPanel({
     () => [
       { value: "default", label: t("library.sortStatus") },
       { value: "title", label: t("library.sortTitle") },
+      { value: "series", label: t("library.sortSeries") },
       { value: "author", label: t("library.sortAuthor") },
       { value: "added", label: t("library.sortAdded") },
       { value: "progress", label: t("library.sortProgress") },

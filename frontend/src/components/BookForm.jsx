@@ -1,15 +1,16 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { apiJson, uploadCover } from "../api.js";
 import { bookStatusOptions } from "../bookStatus.js";
 import { useLocale } from "../i18n/LocaleContext.jsx";
 import SelectMenu from "./SelectMenu.jsx";
 
-export default function BookForm({ onCreated }) {
+export default function BookForm({ onCreated, onDirtyChange }) {
   const { t } = useLocale();
   const coverInputRef = useRef(null);
   const [author, setAuthor] = useState("");
   const [title, setTitle] = useState("");
-  const [volume, setVolume] = useState("");
+  const [series, setSeries] = useState("");
+  const [number, setNumber] = useState("");
   const [wordsTotal, setWordsTotal] = useState("");
   const [pagesTotal, setPagesTotal] = useState("");
   const [description, setDescription] = useState("");
@@ -17,6 +18,26 @@ export default function BookForm({ onCreated }) {
   const [cover, setCover] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const dirty = useMemo(
+    () =>
+      Boolean(
+        author.trim() ||
+          title.trim() ||
+          series.trim() ||
+          number.trim() ||
+          wordsTotal.trim() ||
+          pagesTotal.trim() ||
+          description.trim() ||
+          cover ||
+          status !== "planned"
+      ),
+    [author, title, series, number, wordsTotal, pagesTotal, description, cover, status]
+  );
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
 
   async function submit(e) {
     e.preventDefault();
@@ -26,7 +47,8 @@ export default function BookForm({ onCreated }) {
       const book = await apiJson("POST", "/api/books", {
         author,
         title,
-        volume: volume.trim() || null,
+        series: series.trim() || null,
+        number: number.trim() ? Number(number) : null,
         words_total: Number(wordsTotal || 0),
         pages_total: pagesTotal.trim() ? Number(pagesTotal) : null,
         description: description || null,
@@ -36,7 +58,8 @@ export default function BookForm({ onCreated }) {
       if (cover) finalBook = await uploadCover(book.id, cover);
       setAuthor("");
       setTitle("");
-      setVolume("");
+      setSeries("");
+      setNumber("");
       setWordsTotal("");
       setPagesTotal("");
       setDescription("");
@@ -61,14 +84,26 @@ export default function BookForm({ onCreated }) {
         <label className="label">{t("common.title")}</label>
         <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
-      <div className="formRow">
-        <label className="label">{t("common.volume")}</label>
-        <input
-          className="input"
-          value={volume}
-          onChange={(e) => setVolume(e.target.value)}
-          placeholder={t("common.optional")}
-        />
+      <div className="grid2">
+        <div className="formRow">
+          <label className="label">{t("common.series")}</label>
+          <input
+            className="input"
+            value={series}
+            onChange={(e) => setSeries(e.target.value)}
+            placeholder={t("common.optional")}
+          />
+        </div>
+        <div className="formRow">
+          <label className="label">{t("common.number")}</label>
+          <input
+            className="input"
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+            inputMode="numeric"
+            placeholder={t("common.optional")}
+          />
+        </div>
       </div>
       <div className="grid2">
         <div className="formRow">

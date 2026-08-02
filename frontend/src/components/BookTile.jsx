@@ -1,7 +1,7 @@
 import React from "react";
 import {
   bookStatusLabel,
-  formatBookTitle,
+  formatBookNumber,
   formatReadingDuration,
   formatNumber
 } from "../bookStatus.js";
@@ -12,6 +12,7 @@ import { ClockIcon } from "./MetaIcon.jsx";
 export default function BookTile({ book, onSelect }) {
   const { locale, t } = useLocale();
   const progress = Math.min(100, Math.max(0, book.progress_percent));
+  const numberLabel = formatBookNumber(book.number, t);
 
   return (
     <button type="button" className="bookTile" onClick={() => onSelect?.(book)}>
@@ -22,19 +23,27 @@ export default function BookTile({ book, onSelect }) {
         </div>
         <div className="bookTileOverlay">
           <div className="bookTileOverlayInner">
-            <div className="bookTileOverlayTitle">{formatBookTitle(book.title, book.volume)}</div>
+            <div className="bookTileOverlayTitle">{book.title}</div>
             <div className="bookTileOverlayRow">
               <span className="bookTileOverlayIcon" aria-hidden="true">
                 ✎
               </span>
               <span>{book.author}</span>
             </div>
-            {book.volume ? (
+            {book.series ? (
               <div className="bookTileOverlayRow">
                 <span className="bookTileOverlayIcon" aria-hidden="true">
                   ▤
                 </span>
-                <span>{book.volume}</span>
+                <span>{book.series}</span>
+              </div>
+            ) : null}
+            {numberLabel ? (
+              <div className="bookTileOverlayRow">
+                <span className="bookTileOverlayIcon" aria-hidden="true">
+                  ▤
+                </span>
+                <span>{numberLabel}</span>
               </div>
             ) : null}
             <div className="bookTileOverlayRow">

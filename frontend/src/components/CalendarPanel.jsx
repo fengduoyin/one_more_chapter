@@ -209,7 +209,7 @@ export default function CalendarPanel({ onBooksChanged }) {
   );
 
   function bookLabel(book) {
-    return `${book.author} — ${formatBookTitle(book.title, book.volume)}`;
+    return `${book.author} — ${formatBookTitle(book.title, book.number, book.series, t)}`;
   }
 
   const monthNames = useMemo(() => getMonthNames(locale, "full"), [locale]);

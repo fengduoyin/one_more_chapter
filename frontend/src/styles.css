@@ -66,8 +66,8 @@
   --gradient-2:rgba(162,156,235,.08);
   --progress-fill:rgba(162,156,235,.75);
   --progress-track:rgba(0,0,0,.38);
-  --tile-shadow:drop-shadow(0 8px 14px rgba(0,0,0,.22));
-  --tile-shadow-hover:drop-shadow(0 14px 20px rgba(0,0,0,.30));
+  --tile-shadow:0 8px 14px rgba(0,0,0,.22);
+  --tile-shadow-hover:0 14px 20px rgba(0,0,0,.30);
   --tile-cover-bg:rgba(0,0,0,.22);
   --success-rgb:110,200,160;
   --select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23b8b8c8' d='M1.5 3.5 5 7l3.5-3.5'/%3E%3C/svg%3E");
@@ -129,8 +129,8 @@
   --gradient-2:rgba(162,156,235,.12);
   --progress-fill:rgba(162,156,235,.75);
   --progress-track:rgba(255,255,255,.82);
-  --tile-shadow:drop-shadow(0 8px 14px rgba(98,90,182,.16));
-  --tile-shadow-hover:drop-shadow(0 14px 20px rgba(98,90,182,.24));
+  --tile-shadow:0 8px 14px rgba(98,90,182,.16);
+  --tile-shadow-hover:0 14px 20px rgba(98,90,182,.24);
   --tile-cover-bg:rgba(162,156,235,.08);
   --success-rgb:38,118,82;
   --select-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%235c5c72' d='M1.5 3.5 5 7l3.5-3.5'/%3E%3C/svg%3E");
@@ -1144,14 +1144,40 @@ select.input option:hover{
 }
 
 .bookCoverThumb{
+  position:relative;
   width:100%;
   height:100%;
   border-radius:inherit;
   overflow:hidden;
   background:var(--cover-placeholder-bg);
   flex:0 0 auto;
+  min-width:0;
+  min-height:0;
+  isolation:isolate;
+  contain:paint;
 }
-.bookCoverThumb img{width:100%; height:100%; object-fit:cover; display:block}
+.bookCoverThumb img{
+  position:absolute;
+  display:block;
+  opacity:0;
+}
+.bookCoverThumb img.coverFitWide{
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  opacity:1;
+}
+.bookCoverThumb img.coverFitNarrow{
+  top:0;
+  left:50%;
+  height:100%;
+  width:auto;
+  max-width:none;
+  transform:translateX(-50%);
+  opacity:1;
+}
 
 .bookTile{
   padding:0;
@@ -1161,6 +1187,8 @@ select.input option:hover{
   text-align:left;
   color:inherit;
   border-radius:12px;
+  min-width:0;
+  overflow:hidden;
 }
 .bookTileCoverWrap{
   position:relative;
@@ -1169,14 +1197,15 @@ select.input option:hover{
   border:1px solid var(--border-faint);
   aspect-ratio:2 / 3;
   background:var(--tile-cover-bg);
-  filter:var(--tile-shadow);
-  transition:transform .18s ease, filter .18s ease, border-color .18s ease;
+  isolation:isolate;
+  box-shadow:var(--tile-shadow);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .bookTile:hover .bookTileCoverWrap,
 .bookTile:focus-visible .bookTileCoverWrap{
   transform:translateY(-2px);
   border-color:rgba(var(--accent-rgb),.35);
-  filter:var(--tile-shadow-hover);
+  box-shadow:var(--tile-shadow-hover);
 }
 .bookTileProgressTrack{
   position:absolute;
@@ -1406,6 +1435,7 @@ select.input option:hover{
   align-items:flex-start;
 }
 .bookCover{
+  position:relative;
   width:96px;
   height:138px;
   border-radius:12px;
@@ -1413,8 +1443,18 @@ select.input option:hover{
   border:1px solid var(--border-faint);
   background: var(--cover-placeholder-bg);
   flex:0 0 auto;
+  isolation:isolate;
+  contain:paint;
 }
-.bookCover img{width:100%; height:100%; object-fit:cover; display:block}
+.bookCover img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
 .coverStub{height:100%; display:flex; align-items:center; justify-content:center; color:var(--muted)}
 .bookMeta{flex:1; min-width:0}
 .bookTitle{
@@ -1549,14 +1589,21 @@ select.input option:hover{
   align-items:stretch;
 }
 .bookDetailCover{
+  position:relative;
   width:112px;
   height:162px;
   border-radius:10px;
   overflow:hidden;
   border:1px solid var(--border-faint);
   background:var(--cover-placeholder-bg);
+  isolation:isolate;
+  contain:paint;
 }
-.bookDetailCover img{width:100%; height:100%; object-fit:cover; display:block}
+.bookDetailCover .bookCoverThumb{
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+}
 .bookDetailCoverBtn{
   width:100%;
   padding:0 8px;

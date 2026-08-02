@@ -9,6 +9,7 @@ import {
 } from "../bookStatus.js";
 import { useLocale } from "../i18n/LocaleContext.jsx";
 import ConfirmDialog from "./ConfirmDialog.jsx";
+import BookCoverThumb from "./BookCoverThumb.jsx";
 import { ClockIcon } from "./MetaIcon.jsx";
 import ReadingTimer from "./ReadingTimer.jsx";
 
@@ -16,7 +17,8 @@ function bookFormState(book) {
   return {
     author: book.author,
     title: book.title,
-    volume: book.volume || "",
+    series: book.series || "",
+    number: book.number != null ? String(book.number) : "",
     description: book.description || "",
     pagesTotal: book.pages_total != null ? String(book.pages_total) : "",
     startDate: book.start_date || "",
@@ -34,7 +36,8 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
   const [editing, setEditing] = useState(false);
   const [author, setAuthor] = useState(book.author);
   const [title, setTitle] = useState(book.title);
-  const [volume, setVolume] = useState(book.volume || "");
+  const [series, setSeries] = useState(book.series || "");
+  const [number, setNumber] = useState(book.number != null ? String(book.number) : "");
   const [description, setDescription] = useState(book.description || "");
   const [pagesTotal, setPagesTotal] = useState(book.pages_total != null ? String(book.pages_total) : "");
   const [startDate, setStartDate] = useState(book.start_date || "");
@@ -44,21 +47,49 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
   const [confirmCloseTimer, setConfirmCloseTimer] = useState(false);
+  const [confirmCloseUnsaved, setConfirmCloseUnsaved] = useState(false);
 
   useEffect(() => {
     const next = bookFormState(book);
     setAuthor(next.author);
     setTitle(next.title);
-    setVolume(next.volume);
+    setSeries(next.series);
+    setNumber(next.number);
     setDescription(next.description);
     setPagesTotal(next.pagesTotal);
     setStartDate(next.startDate);
     setEndDate(next.endDate);
   }, [book]);
 
+  const baseline = useMemo(() => bookFormState(book), [book]);
+  const isEditDirty = useMemo(() => {
+    if (!editing) return false;
+    return (
+      author !== baseline.author ||
+      title !== baseline.title ||
+      series !== baseline.series ||
+      number !== baseline.number ||
+      description !== baseline.description ||
+      pagesTotal !== baseline.pagesTotal ||
+      startDate !== baseline.startDate ||
+      endDate !== baseline.endDate
+    );
+  }, [
+    editing,
+    author,
+    title,
+    series,
+    number,
+    description,
+    pagesTotal,
+    startDate,
+    endDate,
+    baseline
+  ]);
+
   const header = useMemo(
-    () => `${book.author} — ${formatBookTitle(book.title, book.volume)}`,
-    [book.author, book.title, book.volume]
+    () => `${book.author} — ${formatBookTitle(book.title, book.number, book.series, t)}`,
+    [book.author, book.title, book.number, book.series, t]
   );
   const dates = useMemo(() => formatReadingDates(book, t), [book, t]);
   const quickCheckinWordsPreview = useMemo(() => {
@@ -150,7 +181,8 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
     const next = bookFormState(book);
     setAuthor(next.author);
     setTitle(next.title);
-    setVolume(next.volume);
+    setSeries(next.series);
+    setNumber(next.number);
     setDescription(next.description);
     setPagesTotal(next.pagesTotal);
     setStartDate(next.startDate);
@@ -166,7 +198,8 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
       const updated = await apiJson("PATCH", `/api/books/${book.id}`, {
         author,
         title,
-        volume: volume.trim() || null,
+        series: series.trim() || null,
+        number: number.trim() ? Number(number) : null,
         description: description || null,
         pages_total: pagesTotal.trim() ? Number(pagesTotal) : null,
         start_date: startDate || null,
@@ -265,6 +298,10 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
       setConfirmCloseTimer(true);
       return;
     }
+    if (isEditDirty) {
+      setConfirmCloseUnsaved(true);
+      return;
+    }
     onClose();
   }
 
@@ -335,14 +372,26 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
                       <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required />
                     </div>
                   </div>
-                  <div className="formRow">
-                    <label className="label">{t("common.volume")}</label>
-                    <input
-                      className="input"
-                      value={volume}
-                      onChange={(e) => setVolume(e.target.value)}
-                      placeholder={t("common.optional")}
-                    />
+                  <div className="grid2">
+                    <div className="formRow">
+                      <label className="label">{t("common.series")}</label>
+                      <input
+                        className="input"
+                        value={series}
+                        onChange={(e) => setSeries(e.target.value)}
+                        placeholder={t("common.optional")}
+                      />
+                    </div>
+                    <div className="formRow">
+                      <label className="label">{t("common.number")}</label>
+                      <input
+                        className="input"
+                        value={number}
+                        onChange={(e) => setNumber(e.target.value)}
+                        inputMode="numeric"
+                        placeholder={t("common.optional")}
+                      />
+                    </div>
                   </div>
                   <div className="formRow">
                     <label className="label">{t("common.description")}</label>
@@ -405,7 +454,7 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
         <div className="cardInner bookDetailActions">
           <div className="bookDetailCoverCol">
             <div className="bookDetailCover">
-              {book.cover_url ? <img src={book.cover_url} alt="" /> : <div className="coverStub">—</div>}
+              <BookCoverThumb book={book} />
             </div>
             <input
               ref={coverInputRef}
@@ -560,6 +609,25 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
           onCancel={() => setConfirmCloseTimer(false)}
           onConfirm={() => {
             setConfirmCloseTimer(false);
+            if (isEditDirty) {
+              setConfirmCloseUnsaved(true);
+              return;
+            }
+            onClose();
+          }}
+        />
+      ) : null}
+
+      {confirmCloseUnsaved ? (
+        <ConfirmDialog
+          className="confirmDialogNarrow"
+          title={t("common.unsavedCloseTitle")}
+          message={t("common.unsavedCloseMessage")}
+          confirmLabel={t("common.unsavedCloseConfirm")}
+          confirmTone="default"
+          onCancel={() => setConfirmCloseUnsaved(false)}
+          onConfirm={() => {
+            setConfirmCloseUnsaved(false);
             onClose();
           }}
         />
@@ -569,7 +637,7 @@ export default function BookDetail({ book, onClose, onChanged, onDeleted }) {
         <ConfirmDialog
           title={t("library.deleteConfirmTitle")}
           message={t("library.deleteConfirmMessage", {
-            title: formatBookTitle(book.title, book.volume)
+            title: formatBookTitle(book.title, book.number, book.series, t)
           })}
           confirmLabel={busy ? t("library.deleting") : t("library.deleteConfirm")}
           busy={busy}

@@ -45,7 +45,9 @@ export default function BookTable({ books, onSelect }) {
                   <div className="libraryTableTitleCell">
                     <BookCoverThumb book={book} />
                     <div className="libraryTableTitleMeta">
-                      <div className="libraryTableTitle">{formatBookTitle(book.title, book.volume)}</div>
+                      <div className="libraryTableTitle">
+                        {formatBookTitle(book.title, book.number, book.series, t)}
+                      </div>
                       <div className="muted libraryTableAuthor">{book.author}</div>
                       {book.description ? (
                         <div className="muted libraryTableSynopsis">

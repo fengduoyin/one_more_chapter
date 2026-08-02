@@ -17,7 +17,8 @@ class BookCreate(BaseModel):
     status: BookStatus = "planned"
     author: str = Field(min_length=1, max_length=256)
     title: str = Field(min_length=1, max_length=256)
-    volume: str | None = Field(default=None, max_length=64)
+    series: str | None = Field(default=None, max_length=256)
+    number: int | None = Field(default=None, ge=0)
     words_total: int = Field(ge=0)
     pages_total: int | None = Field(default=None, ge=0)
     description: str | None = None
@@ -27,7 +28,8 @@ class BookUpdate(BaseModel):
     status: BookStatus | None = None
     author: str | None = Field(default=None, min_length=1, max_length=256)
     title: str | None = Field(default=None, min_length=1, max_length=256)
-    volume: str | None = Field(default=None, max_length=64)
+    series: str | None = Field(default=None, max_length=256)
+    number: int | None = Field(default=None, ge=0)
     words_total: int | None = Field(default=None, ge=0)
     pages_total: int | None = Field(default=None, ge=0)
     description: str | None = None
@@ -45,7 +47,8 @@ class BookOut(BaseModel):
     status: BookStatus
     author: str
     title: str
-    volume: str | None
+    series: str | None
+    number: int | None
     words_total: int
     pages_total: int | None
     description: str | None

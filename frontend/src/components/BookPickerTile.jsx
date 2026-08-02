@@ -24,7 +24,9 @@ export default function BookPickerTile({ book, selected = false, disabled = fals
         <BookCoverThumb book={book} />
       </div>
       <div className="bookPickerTileMeta">
-        <div className="bookPickerTileTitle">{formatBookTitle(book.title, book.volume)}</div>
+        <div className="bookPickerTileTitle">
+          {formatBookTitle(book.title, book.number, book.series, t)}
+        </div>
         <div className="muted bookPickerTileAuthor">{book.author}</div>
         <span className={`pill pillStatus pillStatus--${book.status} bookPickerTileStatus`}>
           {bookStatusLabel(book.status, t)}
