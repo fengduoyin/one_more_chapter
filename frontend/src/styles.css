@@ -1019,7 +1019,7 @@ select.input option:hover{
   border-radius:12px;
   background:var(--popover-bg);
   box-shadow:0 16px 40px var(--card-shadow);
-  max-height:min(280px, calc(100vh - 24px));
+  max-height:min(300px, calc(100vh - 24px));
   overflow:auto;
   overscroll-behavior:contain;
 }
@@ -1085,7 +1085,64 @@ select.input option:hover{
   width:100%;
   min-width:0;
 }
-.libraryBody{padding-top:12px}
+.libraryHead{padding-bottom:12px}
+.libraryBody{
+  padding-top:0;
+  overflow:hidden;
+  border-radius:14px;
+  scrollbar-gutter:auto;
+  display:flex;
+  flex-direction:column;
+}
+.libraryScroller,
+.libraryTableWrap{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:100%;
+}
+.libraryScroller{
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:auto;
+}
+.libraryScroller::-webkit-scrollbar,
+.libraryTableBodyScroll::-webkit-scrollbar{width:10px}
+.libraryScroller::-webkit-scrollbar-thumb,
+.libraryTableBodyScroll::-webkit-scrollbar-thumb{
+  background:var(--surface-4);
+  border-radius:999px;
+  border:2px solid transparent;
+  background-clip:padding-box;
+}
+.libraryScroller::-webkit-scrollbar-track{
+  margin-block:14px;
+  background:transparent;
+}
+.libraryTableBodyScroll::-webkit-scrollbar-track{background:transparent}
+.libraryScrollCap{
+  position:sticky;
+  top:0;
+  z-index:5;
+  height:14px;
+  margin-bottom:-14px;
+  pointer-events:none;
+}
+.libraryScrollCap::before,
+.libraryScrollCap::after{
+  content:"";
+  position:absolute;
+  top:0;
+  width:14px;
+  height:14px;
+}
+.libraryScrollCap::before{
+  left:0;
+  background:radial-gradient(circle at 100% 100%, transparent 14px, var(--surface-1) 14.5px);
+}
+.libraryScrollCap::after{
+  right:0;
+  background:radial-gradient(circle at 0 100%, transparent 14px, var(--surface-1) 14.5px);
+}
 .viewToggle{
   display:flex;
   height:var(--control-height);
@@ -1297,20 +1354,34 @@ select.input option:hover{
 
 .libraryTableWrap{
   margin-top:0;
-  overflow-x:auto;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
   border:1px solid var(--surface-3);
   border-radius:14px;
 }
-.libraryTable thead th{
-  position:sticky;
-  top:0;
-  z-index:2;
-  backdrop-filter:blur(8px);
+.libraryTableHeadBar{
+  display:flex;
+  flex-shrink:0;
+  background:var(--surface-2);
+}
+.libraryTableHeadBar .libraryTable{
+  flex:1;
+  min-width:0;
+}
+.libraryTableHeadSpacer{flex:0 0 10px}
+.libraryTableBodyScroll{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:auto;
 }
 .libraryTable{
   width:100%;
   table-layout:fixed;
-  border-collapse:collapse;
+  border-collapse:separate;
+  border-spacing:0;
 }
 .libraryTableColTitle{width:46%}
 .libraryTableColProgress{width:12%}

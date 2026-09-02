@@ -582,26 +582,24 @@ def analytics(
 
 @router.get("/checkin-days", response_model=CheckinDaysOut)
 def checkin_days(
-    year: int,
+    year: int | None = None,
     month: int | None = None,
     db: Session = Depends(db_session),
 ) -> CheckinDaysOut:
-    if month is None:
-        start, end = year_range(year)
-    else:
-        if month < 1 or month > 12:
-            raise HTTPException(status_code=400, detail="month must be 1..12")
-        start, end = month_range(year, month)
+    stmt = select(Checkin.day).distinct().order_by(Checkin.day.asc())
+    start = end = None
+    if year is not None:
+        if month is None:
+            start, end = year_range(year)
+        else:
+            if month < 1 or month > 12:
+                raise HTTPException(status_code=400, detail="month must be 1..12")
+            start, end = month_range(year, month)
+        stmt = stmt.where(Checkin.day >= start, Checkin.day <= end)
 
-    days = (
-        db.execute(
-            select(Checkin.day)
-            .where(Checkin.day >= start, Checkin.day <= end)
-            .distinct()
-            .order_by(Checkin.day.asc())
-        )
-        .scalars()
-        .all()
-    )
-    return CheckinDaysOut(period_start=start, period_end=end, days=list(days))
+    days = list(db.execute(stmt).scalars().all())
+    if start is None:
+        start = days[0] if days else date.today()
+        end = days[-1] if days else date.today()
+    return CheckinDaysOut(period_start=start, period_end=end, days=days)
 
