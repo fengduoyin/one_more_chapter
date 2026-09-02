@@ -126,10 +126,26 @@ export function computeConnectedDaysInMonth(checkinDays, year, month) {
   return connected;
 }
 
+export function clipRangeToMonth(range, year, month) {
+  const start = monthStartIso(year, month);
+  const end = monthEndIso(year, month);
+  return {
+    start: range.start < start ? start : range.start,
+    end: range.end > end ? end : range.end
+  };
+}
+
+export function rangesOverlappingMonth(days, year, month) {
+  const start = monthStartIso(year, month);
+  const end = monthEndIso(year, month);
+  return groupConsecutiveDays(days).filter((range) => range.start <= end && range.end >= start);
+}
+
 export function runSegmentStyle(range, year, month) {
+  const clipped = clipRangeToMonth(range, year, month);
   const dim = daysInMonth(year, month);
-  const startDay = Number(range.start.split("-")[2]);
-  const endDay = Number(range.end.split("-")[2]);
+  const startDay = Number(clipped.start.split("-")[2]);
+  const endDay = Number(clipped.end.split("-")[2]);
   const left = ((startDay - 1) / dim) * 100;
   const width = ((endDay - startDay + 1) / dim) * 100;
   return { left: `${left}%`, width: `${width}%` };

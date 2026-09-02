@@ -5,9 +5,9 @@ import {
   computeConnectedDaysInMonth,
   computeCurrentStreakDays,
   getMonthNames,
-  groupConsecutiveDays,
   monthEndIso,
-  monthStartIso
+  monthStartIso,
+  rangesOverlappingMonth
 } from "../calendarUtils.js";
 import {
   formatBookTitle,
@@ -85,6 +85,7 @@ export default function CalendarPanel({ onBooksChanged }) {
 
   const [finished, setFinished] = useState(null);
   const [monthCheckins, setMonthCheckins] = useState([]);
+  const [allCheckinDays, setAllCheckinDays] = useState([]);
   const [books, setBooks] = useState([]);
 
   const [selectedDayIso, setSelectedDayIso] = useState(null);
@@ -107,12 +108,14 @@ export default function CalendarPanel({ onBooksChanged }) {
   async function reloadMonth() {
     const from = monthStartIso(year, month);
     const to = monthEndIso(year, month);
-    const [f, checkins] = await Promise.all([
+    const [f, checkins, dayPayload] = await Promise.all([
       apiGet(`/api/stats/finished?year=${year}&month=${month}`),
-      apiGet(`/api/checkins?from_day=${from}&to_day=${to}`)
+      apiGet(`/api/checkins?from_day=${from}&to_day=${to}`),
+      apiGet("/api/stats/checkin-days").catch(() => ({ days: [] }))
     ]);
     setFinished(f);
     setMonthCheckins(checkins);
+    setAllCheckinDays((dayPayload?.days || []).map(String));
   }
 
   useEffect(() => {
@@ -154,8 +157,16 @@ export default function CalendarPanel({ onBooksChanged }) {
     () => [...new Set(monthCheckins.map((row) => row.day))].sort(),
     [monthCheckins]
   );
-  const checkinDaysSet = useMemo(() => new Set(checkinDayList), [checkinDayList]);
-  const checkinRanges = useMemo(() => groupConsecutiveDays(checkinDayList), [checkinDayList]);
+  const streakDayList = useMemo(() => {
+    const days = new Set(allCheckinDays);
+    for (const day of checkinDayList) days.add(day);
+    return [...days].sort();
+  }, [allCheckinDays, checkinDayList]);
+  const checkinDaysSet = useMemo(() => new Set(streakDayList), [streakDayList]);
+  const checkinRanges = useMemo(
+    () => rangesOverlappingMonth(streakDayList, year, month),
+    [streakDayList, year, month]
+  );
   const daySummaries = useMemo(() => buildDaySummaries(monthCheckins), [monthCheckins]);
 
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
@@ -165,8 +176,8 @@ export default function CalendarPanel({ onBooksChanged }) {
   }, [isCurrentMonth, checkinDaysSet, todayIso]);
 
   const connectedDaysSet = useMemo(
-    () => computeConnectedDaysInMonth(checkinDayList, year, month),
-    [checkinDayList, year, month]
+    () => computeConnectedDaysInMonth(streakDayList, year, month),
+    [streakDayList, year, month]
   );
 
   const finishedDaysToBooks = useMemo(() => {
