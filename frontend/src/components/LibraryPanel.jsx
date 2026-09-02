@@ -68,7 +68,7 @@ export default function LibraryPanel({
 
   return (
     <div className="panelShell">
-      <div className="panelShellHead">
+      <div className="panelShellHead libraryHead">
         <div className="libraryHeader">
           <div className="title">{filteredTitle}</div>
           <div className="row libraryHeaderActions">
@@ -124,10 +124,13 @@ export default function LibraryPanel({
         ) : viewMode === "table" ? (
           <BookTable books={visibleBooks} onSelect={onSelect} />
         ) : (
-          <div className="libraryGrid">
-            {visibleBooks.map((book) => (
-              <BookTile key={book.id} book={book} onSelect={onSelect} />
-            ))}
+          <div className="libraryScroller">
+            <div className="libraryScrollCap" aria-hidden="true" />
+            <div className="libraryGrid">
+              {visibleBooks.map((book) => (
+                <BookTile key={book.id} book={book} onSelect={onSelect} />
+              ))}
+            </div>
           </div>
         )}
       </div>
