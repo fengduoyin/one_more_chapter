@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { apiGet } from "./api.js";
+import AppFooter from "./components/AppFooter.jsx";
 import BookAddModal from "./components/BookAddModal.jsx";
 import BookDetail from "./components/BookDetail.jsx";
 import CalendarPanel from "./components/CalendarPanel.jsx";
@@ -135,22 +136,7 @@ export default function App() {
         </main>
       )}
 
-      <footer className="appFooter">
-        <span>
-          {t("brand.madeBy", { name: "fengduoyin" })}
-        </span>
-        <span className="appFooterSep" aria-hidden="true">
-          ·
-        </span>
-        <a
-          className="appFooterLink"
-          href="https://github.com/fengduoyin/one_more_chapter"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("brand.github")}
-        </a>
-      </footer>
+      <AppFooter />
 
       {showAddBook ? (
         <BookAddModal

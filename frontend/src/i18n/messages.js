@@ -4,7 +4,8 @@ export const messages = {
       title: "ONE MORE CHAPTER",
       tagline: "твой личный читательский дневник",
       madeBy: "сделано c ♡ {name}",
-      github: "посмотреть на GitHub"
+      github: "посмотреть на GitHub",
+      updateAvailable: "доступно обновление до {version}"
     },
     nav: {
       library: "Книги",
@@ -284,7 +285,8 @@ export const messages = {
       title: "ONE MORE CHAPTER",
       tagline: "your personal reading diary",
       madeBy: "made with ♡ by {name}",
-      github: "check out on GitHub"
+      github: "check out on GitHub",
+      updateAvailable: "update to {version} available"
     },
     nav: {
       library: "Books",

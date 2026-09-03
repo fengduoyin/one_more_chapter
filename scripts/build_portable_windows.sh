@@ -19,15 +19,26 @@ APP_NAME="One More Chapter"
 DIST_DIR="$ROOT/dist/$OUT_NAME"
 IMAGE="${PORTABLE_WINDOWS_IMAGE:-tobix/pywine:3.13}"
 FILE_IMAGE="${PORTABLE_FILE_IMAGE:-python:3.13-slim}"
+NODE_IMAGE="${PORTABLE_NODE_IMAGE:-node:22-bookworm-slim}"
 STAMP="$(date +%Y%m%d)"
 ZIP_PATH="$ROOT/dist/${OUT_NAME}-${STAMP}.zip"
 
-if [[ ! -f frontend/dist/index.html ]]; then
-  echo "Building frontend…"
+APP_VERSION="$(PYTHONPATH="$ROOT" python3 -c "from backend.app.version import current_version; print(current_version())")"
+echo "App version: v${APP_VERSION}"
+
+echo "Building frontend…"
+if command -v npm >/dev/null 2>&1; then
   if [[ ! -d frontend/node_modules ]]; then
     (cd frontend && npm ci)
   fi
-  (cd frontend && npm run build)
+  (cd frontend && VITE_APP_VERSION="$APP_VERSION" npm run build)
+else
+  echo "Host npm not found; building frontend with $NODE_IMAGE…"
+  docker run --rm \
+    -v "$ROOT:/src" -w /src/frontend \
+    -e VITE_APP_VERSION="$APP_VERSION" \
+    "$NODE_IMAGE" \
+    bash -lc "npm ci && npm run build"
 fi
 
 # Host-side cleanup when possible (avoids Wine/XDG issues on simple rm/chown).

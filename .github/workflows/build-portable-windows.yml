@@ -28,9 +28,15 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Read app version
+        shell: bash
+        run: echo "APP_VERSION=$(python -c 'from backend.app.version import current_version; print(current_version())')" >> "$GITHUB_ENV"
+
       - name: Build frontend
         working-directory: frontend
+        shell: bash
         run: |
+          export VITE_APP_VERSION="${APP_VERSION}"
           npm ci
           npm run build
 
