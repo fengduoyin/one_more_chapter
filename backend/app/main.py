@@ -13,15 +13,19 @@ from fastapi.staticfiles import StaticFiles
 from backend.app.api.books import router as books_router
 from backend.app.api.checkins import router as checkins_router
 from backend.app.api.goals import router as goals_router
+from backend.app.api.meta import router as meta_router
 from backend.app.api.stats import router as stats_router
 from backend.app.bootstrap import ensure_schema
 from backend.app.settings import settings
+from backend.app.updates import warm_latest_release
+from backend.app.version import current_version
 
 
 def create_app() -> FastAPI:
     ensure_schema()
+    warm_latest_release()
 
-    app = FastAPI(title="One More Chapter", version="0.1.1")
+    app = FastAPI(title="One More Chapter", version=current_version())
 
     uploads_path = Path(settings.uploads_dir)
     uploads_path.mkdir(parents=True, exist_ok=True)
@@ -31,6 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(checkins_router)
     app.include_router(goals_router)
     app.include_router(stats_router)
+    app.include_router(meta_router)
 
     @app.get("/health")
     def health() -> dict[str, str]:

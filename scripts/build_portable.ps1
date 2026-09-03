@@ -24,13 +24,16 @@ $ZipPath = Join-Path $Root "dist\${OutName}-${Stamp}.zip"
 $PyiDist = Join-Path $Root "dist\pyi-dist-win"
 $PyiWork = Join-Path $Root "dist\pyi-work-win"
 
-if (-not (Test-Path "frontend\dist\index.html")) {
-  Write-Host "Building frontend…"
-  Push-Location frontend
-  if (-not (Test-Path "node_modules")) { npm ci }
-  npm run build
-  Pop-Location
-}
+$env:PYTHONPATH = "$Root"
+$AppVersion = py -3.13 -c "from backend.app.version import current_version; print(current_version())"
+Write-Host "App version: v$AppVersion"
+
+Write-Host "Building frontend…"
+Push-Location frontend
+if (-not (Test-Path "node_modules")) { npm ci }
+$env:VITE_APP_VERSION = $AppVersion
+npm run build
+Pop-Location
 
 $venv = Join-Path $Root ".venv-win-build"
 if (-not (Test-Path $venv)) {
